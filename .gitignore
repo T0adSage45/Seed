@@ -1,0 +1,9 @@
+build
+compile_commands.json
+.cache
+.clang-format
+.clangd
+
+lib/
+imgui.ini
+
