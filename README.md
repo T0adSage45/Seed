@@ -86,6 +86,5 @@ Seed::Application *Seed::CreateApp() {
 - **Dear ImGui**: Immediate-mode UI (docking branch)
 - **OpenGL**: Rendering backend
 
-## License
-
-[Your license here]
+##
+-  this engine is mostly inspired by cherno's work (**Hazel Engine**)

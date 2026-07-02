@@ -54,6 +54,7 @@ INCLUDES = -ISeed -ISeed/src -ISeed/src/ui -Ilib/imgui -Ilib/imgui/backends -ISe
 # Base Compiler Flags
 BASE_CXXFLAGS = $(CXX_STD) -Wall -Wextra -pedantic -fPIC \
 				-DGLM_FORCE_CXX17  -Wno-invalid-constexpr \
+				-fno-omit-frame-pointer \
 				-DSEED_PLATFORM_LINUX -DSEED_ENABLE_ASSERTS -MMD -MP
 
 # Debug/Release Specific Flags
@@ -85,6 +86,7 @@ LIB_SRCS = \
     Seed/src/platform/Linux/linux_input.cpp \
     Seed/src/renderer/opengl.cpp \
     Seed/src/renderer/render.cpp \
+    Seed/src/renderer/material.cpp \
     Seed/src/renderer/buffer.cpp \
     Seed/src/renderer/shader.cpp \
     Seed/src/renderer/vulkan.cpp \
@@ -106,7 +108,7 @@ SANDBOX_OBJS = $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(SANDBOX_SRCS))
 SANDBOX_DEPS = $(SANDBOX_OBJS:.o=.d)
 
 # Phony Targets (Non-file Targets)
-.PHONY: all init lib sandbox run clean rebuild debug release help
+.PHONY: all init lib sandbox run clean rebuild debug release help perf-record flamegraph
 
 # Default Target
 all: lib sandbox
@@ -123,8 +125,11 @@ help:
 	@echo "  rebuild           Clean and rebuild all"
 	@echo "  debug             Build debug mode (assertions + symbols)"
 	@echo "  release           Build release mode (optimized, no assertions)"
+	@echo "  perf-record       Build release + record perf data (Ctrl+C to stop)"
+	@echo "  flamegraph        Generate flamegraph.svg from perf.data and open"
 	@echo ""
 	@echo "Override build type: make BUILD_TYPE=release"
+	@echo "Profiling: make perf-record BUILDTYPE=debug  (debug build)"
 
 # Initialize Submodules
 init:
@@ -163,7 +168,7 @@ $(SANDBOX_TARGET): $(SANDBOX_OBJS) $(LIB_TARGET) | $(BIN_DIR)
 
 # App
 app: sandbox $(LIB_TARGET)
-		$(CXX) $(SANDBOX_OBJS) $(LIB_TARGET) -o $(BIN_DIR)/$@
+		$(CXX) -fno-omit-frame-pointer $(SANDBOX_OBJS) $(LIB_TARGET) -o $(BIN_DIR)/$@
 
 # Run Sandbox
 run: sandbox
@@ -172,7 +177,7 @@ run: sandbox
 
 # Clean Build Artifacts
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) imgui.ini perf* flamegraph*
 
 # Rebuild All
 rebuild: clean all
@@ -186,6 +191,18 @@ debug:
 release:
 	$(MAKE) clean
 	$(MAKE) BUILD_TYPE=release all
+
+# Profiling: Record perf data (run interactively, Ctrl+C to stop)
+perf-record: BUILDTYPE ?= release
+perf-record:
+	$(MAKE) BUILD_TYPE=$(BUILDTYPE) sandbox
+	@echo "Recording perf data (press Ctrl+C to stop)..."
+	LD_LIBRARY_PATH=$(LIB_DIR) perf record -g -- $(SANDBOX_TARGET)
+
+# Profiling: Generate flamegraph from existing perf.data and open in browser
+flamegraph:
+	perf script | stackcollapse-perf.pl | flamegraph.pl > flamegraph.svg
+	xdg-open flamegraph.svg
 
 # Include Dependency Files (Automatic Header Tracking)
 -include $(LIB_DEPS) $(SANDBOX_DEPS)

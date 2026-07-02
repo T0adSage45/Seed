@@ -1,14 +1,8 @@
 #pragma once
-#include <glm/ext/vector_float3.hpp>
 #include <pch.h>
-#include "core.h"
-#include "events.h"
 #include "layerstack.h"
-#include "runtime.h"
 #include "ui.h"
 #include "window.h"
-#include <chrono>
-#include <memory>
 
 namespace Seed {
 class SEED_API Application {

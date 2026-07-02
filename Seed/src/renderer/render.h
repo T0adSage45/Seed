@@ -1,10 +1,8 @@
 #pragma once
 #include "materials.h"
-#include "pch.h"
 #include "SDL3/SDL_video.h"
 #include "camera.h"
 #include "renderer/buffer.h"
-#include "shader.h"
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/vec4.hpp>
 namespace Seed {
@@ -47,9 +45,10 @@ public:
     static void OpenScene(const Scene &scene);
     static void Flush();
     static void Submit(const std::shared_ptr<VertexArr> &va,
-                       const std::shared_ptr<Shader> &shader,
                        const std::shared_ptr<Materials> &mat,
-                       glm::vec3 transform = glm::vec3(1.0f));
+                       glm::vec3 transform = glm::vec3(1.0f),
+                       glm::vec3 scale = glm::vec3(1.0f));
+
     static void CloseScene();
 
 private:

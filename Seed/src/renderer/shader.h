@@ -1,7 +1,6 @@
 #pragma once
 #include <pch.h>
-#include <glm/vec3.hpp>
-#include <glm/mat4x4.hpp>
+
 namespace Seed {
 
 class Shader {

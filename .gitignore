@@ -4,6 +4,9 @@ compile_commands.json
 .clang-format
 .clangd
 
+perf*
+flamegraph*
+
 lib/
 imgui.ini
 

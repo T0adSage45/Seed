@@ -30,6 +30,7 @@
             bear
             sdl3
             perf
+            flamegraph
 
             clang
             clang-tools

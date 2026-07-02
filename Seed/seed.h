@@ -11,6 +11,7 @@
 
 #include "src/window.h"
 #include "src/camera.h"
+#include "src/runtime.h"
 
 #include "src/layers.h"
 #include "src/layerstack.h"
@@ -18,6 +19,7 @@
 #include "src/renderer/render.h"
 #include "src/renderer/buffer.h"
 #include "src/renderer/shader.h"
+#include "src/renderer/materials.h"
 
 #include "src/ui/ui.h"
 

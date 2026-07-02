@@ -6,6 +6,7 @@
 #include "shader.h"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/vector_float3.hpp>
+#include <glm/ext/vector_float4.hpp>
 #include <memory>
 
 namespace Seed {
@@ -39,17 +40,21 @@ void Renderer::OpenScene(const Scene &scene) {
 };
 
 void Renderer::Submit(const std::shared_ptr<VertexArr> &va,
-                      const std::shared_ptr<Shader> &shader,
                       const std::shared_ptr<Materials> &mat,
-                      glm::vec3 transform) {
+                      glm::vec3 transform,
+                      glm::vec3 scale) {
     va->Bind();
-    shader->Bind();
-    std::dynamic_pointer_cast<Gl_Shader>(shader)->UploadUniform(
-        "u_Transform", glm::translate(glm::mat4(1.0f), transform));
-    std::dynamic_pointer_cast<Gl_Shader>(shader)->UploadUniform("u_ViewProjMatrix",
-                                                                m_Scene->m_viewprojection_mat);
+    std::shared_ptr<Shader> shade = mat->GetShader();
+    shade->Bind();
+    std::dynamic_pointer_cast<Gl_Shader>(shade)->UploadUniform(
+        "u_Transform",
+        glm::translate(glm::mat4(1.0f), transform) * glm::scale(glm::mat4(1.0f), scale));
+    std::dynamic_pointer_cast<Gl_Shader>(shade)->UploadUniform(
+        "u_ViewProjMatrix", Renderer::m_Scene->m_viewprojection_mat);
+    std::dynamic_pointer_cast<Gl_Shader>(shade)->UploadUniform("u_Color", mat->GetColor());
     RenderCmd::Draw(va);
 };
+
 void Renderer::Flush() {};
 void Renderer::CloseScene() {};
 } // namespace Seed

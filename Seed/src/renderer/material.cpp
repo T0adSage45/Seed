@@ -1,11 +1,12 @@
 #include "materials.h"
+#include <glm/ext/vector_float4.hpp>
+#include <memory>
 
 namespace Seed {
 
-Materials *Materials::s_instance;
-
-Materials::Materials(MaterialType mat_type)
-    : m_type(mat_type) {
+Materials::Materials(MaterialType mat_type, glm::vec4 m_color)
+    : m_type(mat_type),
+      m_flatColor(m_color) {
 
     const char *vertexShaderSource = R"(
         #version 330 core
@@ -14,14 +15,14 @@ Materials::Materials(MaterialType mat_type)
 
         uniform mat4 u_ViewProjMatrix;
         uniform mat4 u_Transform;
+        uniform vec4 u_Color;
 
-        out vec3 v_Pos;
         out vec4 v_Color;
 
         void main()
         {
         gl_Position = u_ViewProjMatrix * u_Transform  * vec4(m_pos.x, m_pos.y, m_pos.z, 1);
-        v_Color = m_color;
+        v_Color = u_Color;
         } ;
     )";
     const char *fragmentShaderSource = R"(
@@ -29,12 +30,10 @@ Materials::Materials(MaterialType mat_type)
 
         layout(location = 0) out vec4 color;
 
-        in vec3 v_Pos;
         in vec4 v_Color;
 
         void main()
         {
-        color = vec4(0.3f, 0.3f, 0.7f, 1.0f);
         color = v_Color;
         };
     )";

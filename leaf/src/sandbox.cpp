@@ -1,17 +1,9 @@
-#include "camera.h"
-#include "imgui.h"
-#include "input.h"
-#include "keycode.h"
-#include "materials.h"
-#include "render.h"
-#include "runtime.h"
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/trigonometric.hpp>
 #include <seed.h>
-#include <string>
 
 class Demo : public Seed::Layer {
 private:
@@ -19,6 +11,8 @@ private:
     std::shared_ptr<Seed::Shader> m_Shader;
     std::shared_ptr<Seed::Shader> m_blShader;
     std::shared_ptr<Seed::VertexArr> m_SQva;
+    std::shared_ptr<Seed::Materials> m_flatmat;
+    std::shared_ptr<Seed::Materials> m_toonmat;
     Seed::PerspectiveCam m_Camera;
     // Seed::OrthographicCam m_Camera;
     glm::vec3 cam_Pos;
@@ -26,6 +20,7 @@ private:
     glm::vec3 transform_Pos;
     glm::vec4 texture_color{0.3f, 0.9f, 0.7f, 1.0f};
     glm::vec4 clear_color{0.15f, 0.00f, 0.15f, 1.0f};
+    glm::vec4 square_color{1.0f, 0.5f, 0.2f, 1.0f};
 
 public:
     Demo()
@@ -63,41 +58,9 @@ public:
 
         m_vertarr->SetIndexBuffer(m_ibuff);
 
-        // const char *vertexShaderSource = R"(
-        //     #version 330 core
-        //     layout(location = 0) in vec3 m_pos;
-        //     layout(location = 1) in vec4 m_color;
-        //
-        //     uniform mat4 u_ViewProjMatrix;
-        //     uniform mat4 u_Transform;
-        //
-        //     out vec3 v_Pos;
-        //     out vec4 v_Color;
-        //
-        //     void main()
-        //     {
-        //     gl_Position = u_ViewProjMatrix * u_Transform  * vec4(m_pos.x, m_pos.y, m_pos.z, 1);
-        //     v_Color = m_color;
-        //     } ;
-        // )";
-        // const char *fragmentShaderSource = R"(
-        //     #version 330 core
-        //
-        //     layout(location = 0) out vec4 color;
-        //
-        //     in vec3 v_Pos;
-        //     in vec4 v_Color;
-        //
-        //     void main()
-        //     {
-        //     color = vec4(0.3f, 0.3f, 0.7f, 1.0f);
-        //     color = v_Color;
-        //     };
-        // )";
-        //
-        // m_Shader.reset(Seed::Shader::Create(vertexShaderSource, fragmentShaderSource));
+        m_flatmat.reset(Seed::Materials::Create(Seed::MaterialType::FlatShader));
 
-        Seed::Materials flat_mat = Seed::Materials(Seed::MaterialType::FlatShader);
+        // next one
 
         m_SQva.reset(Seed::VertexArr::Create());
 
@@ -145,36 +108,7 @@ public:
         m_sqibuff->Bind();
 
         m_SQva->SetIndexBuffer(m_sqibuff);
-
-        const char *blvertexShaderSource = R"(
-            #version 330 core
-            layout(location = 0) in vec3 m_pos;
-            layout(location = 1) in vec4 m_color;
-
-            uniform mat4 u_ViewProjMatrix;
-            uniform mat4 u_Transform;
-            out vec4 v_Color;
-
-            void main()
-            {
-            gl_Position = u_ViewProjMatrix * u_Transform* vec4(m_pos.x, m_pos.y, m_pos.z, 1.0f);
-            v_Color = m_color;
-            } ;
-        )";
-        const char *blfragmentShaderSource = R"(
-            #version 330 core
-
-            layout(location = 0) out vec4 color;
-
-            in vec4 v_Color;
-
-            void main()
-            {
-            color = v_Color;
-            };
-        )";
-
-        m_blShader.reset(Seed::Shader::Create(blvertexShaderSource, blfragmentShaderSource));
+        m_toonmat.reset(Seed::Materials::Create(Seed::MaterialType::ToonShader));
 
         m_Camera.SetPosition(cam_Pos);
         m_Camera.RecalcViewMatrix();
@@ -187,49 +121,48 @@ public:
         cam_Pos = m_Camera.GetPosition();
         cam_Rot = m_Camera.GetRotation();
 
-        Seed::InputManager *i;
-        if (i->IsKeyPressed(Seed_KeyLeft)) {
+        if (Seed::InputManager::IsKeyPressed(Seed_KeyLeft)) {
             cam_Pos.x += speed;
             m_Camera.SetPosition(cam_Pos);
-        } else if (i->IsKeyPressed(Seed_KeyRight)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyRight)) {
             cam_Pos.x -= speed;
             m_Camera.SetPosition(cam_Pos);
-        } else if (i->IsKeyPressed(Seed_KeyJ)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyJ)) {
             transform_Pos.x += speed;
-        } else if (i->IsKeyPressed(Seed_KeyK)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyK)) {
             transform_Pos.x -= speed;
-        } else if (i->IsKeyPressed(Seed_KeyL)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyL)) {
             transform_Pos.y += speed;
-        } else if (i->IsKeyPressed(Seed_KeyM)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyM)) {
             transform_Pos.y -= speed;
-        } else if (i->IsKeyPressed(Seed_KeyUp)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyUp)) {
             cam_Pos.y -= speed;
             m_Camera.SetPosition(cam_Pos);
-        } else if (i->IsKeyPressed(Seed_KeyDown)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyDown)) {
             cam_Pos.y += speed;
             m_Camera.SetPosition(cam_Pos);
-        } else if (i->IsKeyPressed(Seed_KeyA)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyA)) {
             cam_Pos.z += speed;
             m_Camera.SetPosition(cam_Pos);
-        } else if (i->IsKeyPressed(Seed_KeyQ)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyQ)) {
             cam_Pos.z -= speed;
             m_Camera.SetPosition(cam_Pos);
-        } else if (i->IsKeyPressed(Seed_KeyE)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyE)) {
             cam_Rot.x += speed;
             m_Camera.SetRotation(cam_Rot);
-        } else if (i->IsKeyPressed(Seed_KeyR)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyR)) {
             cam_Rot.x -= speed;
             m_Camera.SetRotation(cam_Rot);
-        } else if (i->IsKeyPressed(Seed_KeyD)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyD)) {
             cam_Rot.y += speed;
             m_Camera.SetRotation(cam_Rot);
-        } else if (i->IsKeyPressed(Seed_KeyF)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyF)) {
             cam_Rot.y -= speed;
             m_Camera.SetRotation(cam_Rot);
-        } else if (i->IsKeyPressed(Seed_KeyC)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyC)) {
             cam_Rot.z += speed;
             m_Camera.SetRotation(cam_Rot);
-        } else if (i->IsKeyPressed(Seed_KeyV)) {
+        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyV)) {
             cam_Rot.z -= speed;
             m_Camera.SetRotation(cam_Rot);
         }
@@ -243,17 +176,31 @@ public:
 
         // update for bind values
 
-        Seed::Renderer::Submit(m_SQva, m_blShader, transform_Pos);
-        Seed::Renderer::Submit(m_vertarr, m_Shader);
+        for (int j = 0; j < 40; j++) {
+            for (int i = 0; i < 40; i++) {
+                if ((i + j) % 2 == 0) {
+                    m_toonmat->SetColor(texture_color);
+                } else {
+                    m_toonmat->SetColor(square_color);
+                }
+                Seed::Renderer::Submit(m_SQva, m_toonmat, {(float)i * 0.4f, (float)j * 0.4f, 1.0f},
+                                       glm::vec3(0.1f));
+            };
+        };
+
+        m_flatmat->SetColor(texture_color);
+        Seed::Renderer::Submit(m_vertarr, m_flatmat, transform_Pos);
 
         Seed::Renderer::CloseScene();
     };
 
     void OnImGuiDrawCall() override {
-        // ImGui::Begin("tools...");
-        // ImGui::Text("Basic Controls");
-        // ImGui::ColorEdit4("clear color", glm::value_ptr(clear_color));
-        // ImGui::End();
+        ImGui::Begin("tools...");
+        ImGui::Text("Basic Controls");
+        ImGui::ColorEdit4("clear color", glm::value_ptr(clear_color));
+        ImGui::ColorEdit4("txture color", glm::value_ptr(texture_color));
+        ImGui::ColorEdit4("square color", glm::value_ptr(square_color));
+        ImGui::End();
     };
 };
 

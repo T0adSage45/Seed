@@ -14,6 +14,7 @@ Application *Application::s_instance = nullptr;
 
 // constructor
 Application::Application() {
+
     if (s_instance == nullptr) {
         s_instance = this;
     }

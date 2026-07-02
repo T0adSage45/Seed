@@ -22,6 +22,7 @@ void GLcontext::Init() {
 
     SDL_GL_MakeCurrent(m_seed_windowhandler, seed_glContext);
 
+    glEnable(GL_DEPTH_TEST);
     std::cout << glGetString(GL_VENDOR) << "\n";
     std::cout << glGetString(GL_RENDERER) << "\n";
     std::cout << glGetString(GL_VERSION) << "\n";
@@ -266,4 +267,8 @@ void Gl_Shader::UploadUniform(const std::string name, const glm::mat4 mat) {
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
 };
 
+void Gl_Shader::UploadUniform(const std::string name, const glm::vec4 vec) {
+    GLuint loc = glGetUniformLocation(m_shaderID, name.c_str());
+    glUniform4fv(loc, 1, glm::value_ptr(vec));
+};
 } // namespace Seed
