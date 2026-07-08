@@ -3,6 +3,7 @@
 #include "materials.h"
 #include "renderer/buffer.h"
 #include "renderer/opengl.h"
+#include "renderer/texture.h"
 #include "shader.h"
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/vector_float3.hpp>
@@ -42,10 +43,16 @@ void Renderer::OpenScene(const Scene &scene) {
 void Renderer::Submit(const std::shared_ptr<VertexArr> &va,
                       const std::shared_ptr<Materials> &mat,
                       glm::vec3 transform,
-                      glm::vec3 scale) {
+                      glm::vec3 scale,
+                      const std::shared_ptr<Texture> &texture) {
     va->Bind();
     std::shared_ptr<Shader> shade = mat->GetShader();
     shade->Bind();
+    if (texture) {
+        int slot = 0;
+        texture->Bind(slot);
+        std::dynamic_pointer_cast<Gl_Shader>(shade)->UploadUniform("u_Texture", slot);
+    }
     std::dynamic_pointer_cast<Gl_Shader>(shade)->UploadUniform(
         "u_Transform",
         glm::translate(glm::mat4(1.0f), transform) * glm::scale(glm::mat4(1.0f), scale));

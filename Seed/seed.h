@@ -20,6 +20,7 @@
 #include "src/renderer/buffer.h"
 #include "src/renderer/shader.h"
 #include "src/renderer/materials.h"
+#include "src/renderer/texture.h"
 
 #include "src/ui/ui.h"
 

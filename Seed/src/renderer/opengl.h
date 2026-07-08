@@ -3,7 +3,10 @@
 #include "SDL3/SDL_video.h"
 #include "buffer.h"
 #include "render.h"
+#include "texture.h"
 #include <cstdint>
+#include <glm/ext/vector_float1.hpp>
+#include <glm/ext/vector_float3.hpp>
 
 namespace Seed {
 
@@ -75,6 +78,28 @@ private:
 
 namespace Seed {
 
+class Gl_Texture2D : public Texture {
+public:
+    Gl_Texture2D(const std::string &path);
+    virtual ~Gl_Texture2D();
+
+    virtual void Bind(uint32_t slot = 0) const override;
+    virtual void Unbind() const override;
+
+    virtual uint32_t GetWidth() const override { return m_Width; };
+    virtual uint32_t GetHeight() const override { return m_Height; };
+    virtual const std::string &GetPath() const override { return m_Path; };
+
+private:
+    uint32_t m_RendererID;
+    uint32_t m_Width, m_Height;
+    std::string m_Path;
+};
+
+} // namespace Seed
+
+namespace Seed {
+
 class Gl_RendererAPI : public RendererAPI {
 public:
     ~Gl_RendererAPI() override {};
@@ -95,7 +120,13 @@ public:
     virtual void Bind() const;
     virtual void UnBind() const;
 
+    void UploadUniform(const std::string name, const glm::mat2 mat);
+    void UploadUniform(const std::string name, const glm::mat3 mat);
     void UploadUniform(const std::string name, const glm::mat4 mat);
+    void UploadUniform(const std::string name, const glm::vec1 vec);
+    void UploadUniform(const std::string name, int value);
+    void UploadUniform(const std::string name, const glm::vec2 vec);
+    void UploadUniform(const std::string name, const glm::vec3 vec);
     void UploadUniform(const std::string name, const glm::vec4 vec);
 
 private:

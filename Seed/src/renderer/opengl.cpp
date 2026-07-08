@@ -1,10 +1,17 @@
 #include "renderer/opengl.h"
 #include "GL/glew.h"
 #include "core.h"
+#include "log.h"
 #include "renderer/buffer.h"
 #include <cstdint>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <sstream>
+#include <streambuf>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 namespace Seed {
 
 GLcontext::GLcontext(SDL_Window *windowHandler)
@@ -13,19 +20,17 @@ GLcontext::GLcontext(SDL_Window *windowHandler)
 void GLcontext::Init() {
     seed_glContext = SDL_GL_CreateContext(m_seed_windowhandler);
 
-    if (!seed_glContext) {
-        std::cout << "seed glcontext not created" << std::endl;
-    }
+    SEED_CORE_ASSERT(seed_glContext, "seed glcontext not created");
 
     glewExperimental = GL_TRUE;
     glewInit();
 
     SDL_GL_MakeCurrent(m_seed_windowhandler, seed_glContext);
-
     glEnable(GL_DEPTH_TEST);
-    std::cout << glGetString(GL_VENDOR) << "\n";
-    std::cout << glGetString(GL_RENDERER) << "\n";
-    std::cout << glGetString(GL_VERSION) << "\n";
+
+    Seed_Info("%s", glGetString(GL_VENDOR));
+    Seed_Info("%s", glGetString(GL_RENDERER));
+    Seed_Info("%s", glGetString(GL_VERSION));
 };
 
 void GLcontext::Swapbuffer() {
@@ -141,6 +146,48 @@ void Gl_VertArr::SetIndexBuffer(const std::shared_ptr<IndexBuffer> &indexbuf) {
 
 namespace Seed {
 
+Gl_Texture2D::Gl_Texture2D(const std::string &path)
+    : m_Path(path) {
+    int width, height, channels;
+    stbi_set_flip_vertically_on_load(1);
+    unsigned char *data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    SEED_CORE_ASSERT(data, "Texture failed to load");
+
+    m_Width = width;
+    m_Height = height;
+
+    GLenum internalFormat = 0, dataFormat = 0;
+    internalFormat = GL_RGBA8;
+    dataFormat = GL_RGBA;
+
+    glGenTextures(1, &m_RendererID);
+    glBindTexture(GL_TEXTURE_2D, m_RendererID);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE,
+                 data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    stbi_image_free(data);
+};
+
+Gl_Texture2D::~Gl_Texture2D() { glDeleteTextures(1, &m_RendererID); };
+
+void Gl_Texture2D::Bind(uint32_t slot) const {
+    glActiveTexture(GL_TEXTURE0 + slot);
+    glBindTexture(GL_TEXTURE_2D, m_RendererID);
+};
+
+void Gl_Texture2D::Unbind() const { glBindTexture(GL_TEXTURE_2D, 0); };
+
+} // namespace Seed
+//
+
+namespace Seed {
+
 void Gl_RendererAPI::Clear() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); };
 void Gl_RendererAPI::SetClearColor(const glm::vec4 color) {
     glClearColor(color.r, color.g, color.b, color.a);
@@ -180,6 +227,14 @@ Gl_Shader::Gl_Shader(const std::string &vertexSrc, const std::string &fragmentSr
         glDeleteShader(vertexShader);
 
         // Use the infoLog as you see fit.
+        int i = 0;
+        std::stringbuf ss;
+        while (i < maxLength) {
+            ss.sputc(infoLog[i]);
+            i++;
+        }
+
+        Seed_Error("%s", ss.str().c_str());
 
         // In this simple program, we'll just leave
         return;
@@ -211,6 +266,14 @@ Gl_Shader::Gl_Shader(const std::string &vertexSrc, const std::string &fragmentSr
         glDeleteShader(vertexShader);
 
         // Use the infoLog as you see fit.
+        int i = 0;
+        std::stringbuf ss;
+        while (i < maxLength) {
+            ss.sputc(infoLog[i]);
+            i++;
+        }
+
+        Seed_Error("%s", ss.str().c_str());
 
         // In this simple program, we'll just leave
         return;
@@ -262,13 +325,39 @@ void Gl_Shader::Bind() const { glUseProgram(m_shaderID); };
 
 void Gl_Shader::UnBind() const { glUseProgram(0); };
 
+void Gl_Shader::UploadUniform(const std::string name, const glm::mat2 mat) {
+    GLuint loc = glGetUniformLocation(m_shaderID, name.c_str());
+    glUniformMatrix2fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
+};
+void Gl_Shader::UploadUniform(const std::string name, const glm::mat3 mat) {
+    GLuint loc = glGetUniformLocation(m_shaderID, name.c_str());
+    glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
+};
 void Gl_Shader::UploadUniform(const std::string name, const glm::mat4 mat) {
     GLuint loc = glGetUniformLocation(m_shaderID, name.c_str());
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
 };
 
+void Gl_Shader::UploadUniform(const std::string name, const glm::vec1 vec) {
+    GLuint loc = glGetUniformLocation(m_shaderID, name.c_str());
+    glUniform1fv(loc, 1, glm::value_ptr(vec));
+};
+void Gl_Shader::UploadUniform(const std::string name, const glm::vec2 vec) {
+    GLuint loc = glGetUniformLocation(m_shaderID, name.c_str());
+    glUniform2fv(loc, 1, glm::value_ptr(vec));
+};
+void Gl_Shader::UploadUniform(const std::string name, const glm::vec3 vec) {
+    GLuint loc = glGetUniformLocation(m_shaderID, name.c_str());
+    glUniform3fv(loc, 1, glm::value_ptr(vec));
+};
 void Gl_Shader::UploadUniform(const std::string name, const glm::vec4 vec) {
     GLuint loc = glGetUniformLocation(m_shaderID, name.c_str());
     glUniform4fv(loc, 1, glm::value_ptr(vec));
 };
+
+void Gl_Shader::UploadUniform(const std::string name, int value) {
+    GLuint loc = glGetUniformLocation(m_shaderID, name.c_str());
+    glUniform1i(loc, value);
+};
+
 } // namespace Seed

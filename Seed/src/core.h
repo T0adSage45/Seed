@@ -27,9 +27,12 @@
         }                                                                      \
     }
 #else
+
 #define SEED_ASSERT(x, ...)
 #define SEED_CORE_ASSERT(x, ...)
 #endif
+
+// stb image included in texture.cpp
 
 // macros
 #define BIT(x) (1 << x) // for event bits.

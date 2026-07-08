@@ -3,6 +3,7 @@
 EXTRA_INCLUDES = \
 				 -I/nix/store/45npani18v2m7sbkrzrv2xyilyghrny9-gnumake-4.4.1/include \
 				 -I/nix/store/24720qn3bfvkp4c1zv1c1mvg7kvdhpzv-sdl3-3.4.2-dev/include \
+				 -I/nix/store/hm1c2ngx8jpd4zqrhq5w84qslx5fqy51-perf-linux-6.19.11/include \
 				 -I/nix/store/8l5ycdza5db0jjd09lz1pcz2c1x004fj-libcxx-21.1.8-dev/include \
 				 -I/nix/store/v64aggksnpk4lwng8ivglwcj6qpzvriz-lld-21.1.8-dev/include \
 				 -I/nix/store/8j8vnrqibn3s0l8kpz4ah6nhpfpa2i0c-lldb-21.1.8-dev/include \
@@ -11,16 +12,11 @@ EXTRA_INCLUDES = \
 				 -I/nix/store/w40cp3rmw62djczxff5ipgm046x0wgw3-glu-9.0.3-dev/include \
 				 -isystem/nix/store/df6d1ggswpdwjyj36zwh93ayhvn0nnpk-glm-1.0.2/include \
 				 -I/nix/store/axr5s1q5jmjsw3f2754xdm6q6rmyy12w-vulkan-headers-1.4.341.0/include \
-				 -I/nix/store/2dasizwxbzyshf6hhg7p3q3ciwym999b-shaderc-2026.1-dev/include \
-				 -I/nix/store/6r012bpx6frkl6kcq6a8rjdxbm9r4irl-glslang-16.2.0-dev/include \
-				 -I/nix/store/alrnfsvl5zr8043sm7bs47akhmm355z1-spirv-tools-1.4.341.0-dev/include \
-				 -I/nix/store/fl23713nvv8flr1lvy9ziwr9gadpw0vn-spirv-headers-1.4.341.0/include \
 				 -I/nix/store/cr5lim02i1zl0ggx5bxic3r02k09mrkg-compiler-rt-libc-21.1.8-dev/include \
 				 -I/nix/store/lvwga6ivl1d4lnw0zis9ajs0rqx9gp4i-gcc-15.2.0/include/c++/15.2.0 \
 				 -I/nix/store/lvwga6ivl1d4lnw0zis9ajs0rqx9gp4i-gcc-15.2.0/include/c++/15.2.0/x86_64-unknown-linux-gnu \
 				 -I/nix/store/hh6y3s72d21whp6q98h4dh0valxiaw69-clang-wrapper-21.1.8/resource-root/include \
-				 -I/nix/store/h0ip0h6qp7kc2wm7mwjaglkxxbzmjri4-glibc-2.42-51-dev/include \
-				 -I/nix/store/hh6y3s72d21whp6q98h4dh0valxiaw69-clang-wrapper-21.1.8/resource-root/include
+				 -I/nix/store/h0ip0h6qp7kc2wm7mwjaglkxxbzmjri4-glibc-2.42-51-dev/include
 
 
 # Compiler Configuration
@@ -49,7 +45,7 @@ PKG_CFLAGS = $(shell pkg-config sdl3 gl --cflags vulkan shaderc 2>/dev/null || e
 PKG_LIBS   = $(shell pkg-config sdl3 gl --libs 2>/dev/null || echo "-lSDL3")
 
 # Include Paths (Engine + ImGui + ImGui Backends + SDL3)
-INCLUDES = -ISeed -ISeed/src -ISeed/src/ui -Ilib/imgui -Ilib/imgui/backends -ISeed/src/platform/Linux -ISeed/src/renderer $(PKG_CFLAGS) $(EXTRA_INCLUDES)
+INCLUDES = -ISeed -ISeed/src -ISeed/src/ui  -Ilib -Ilib/imgui -Ilib/imgui/backends -ISeed/src/platform/Linux -ISeed/src/renderer $(PKG_CFLAGS) $(EXTRA_INCLUDES)
 
 # Base Compiler Flags
 BASE_CXXFLAGS = $(CXX_STD) -Wall -Wextra -pedantic -fPIC \
@@ -87,6 +83,7 @@ LIB_SRCS = \
     Seed/src/renderer/opengl.cpp \
     Seed/src/renderer/render.cpp \
     Seed/src/renderer/material.cpp \
+    Seed/src/renderer/texture.cpp \
     Seed/src/renderer/buffer.cpp \
     Seed/src/renderer/shader.cpp \
     Seed/src/renderer/vulkan.cpp \
