@@ -39,7 +39,7 @@ Materials::Materials(MaterialType mat_type, glm::vec4 m_color)
 
         void main()
         {
-            color = texture(u_Texture, f_uv);
+            color = texture(u_Texture, f_uv) * f_color;
         };
     )";
 

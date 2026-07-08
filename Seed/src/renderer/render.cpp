@@ -48,7 +48,7 @@ void Renderer::Submit(const std::shared_ptr<VertexArr> &va,
     va->Bind();
     std::shared_ptr<Shader> shade = mat->GetShader();
     shade->Bind();
-    if (texture) {
+    if (texture != nullptr) {
         int slot = 0;
         texture->Bind(slot);
         std::dynamic_pointer_cast<Gl_Shader>(shade)->UploadUniform("u_Texture", slot);

@@ -9,7 +9,7 @@ enum class MaterialType { FlatShader, ToonShader };
 
 class Materials {
 public:
-    Materials(MaterialType mat_type, glm::vec4 m_color = {0.4f, 0.8f, 1.2f, 0.5f});
+    Materials(MaterialType mat_type, glm::vec4 m_color = {1.0f, 1.0f, 1.0f, 1.0f});
 
     static Materials *Create(MaterialType type) { return new Materials(type); };
 

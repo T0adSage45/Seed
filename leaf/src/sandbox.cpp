@@ -17,9 +17,9 @@ private:
     glm::vec3 cam_Pos;
     glm::vec3 cam_Rot;
     glm::vec3 transform_Pos;
-    glm::vec4 texture_color{0.3f, 0.9f, 0.7f, 1.0f};
-    glm::vec4 clear_color{0.15f, 0.00f, 0.15f, 1.0f};
-    glm::vec4 square_color{1.0f, 0.5f, 0.2f, 1.0f};
+    glm::vec4 texture_color{1.0f, 1.0f, 1.0f, 1.0f};
+    glm::vec4 clear_color{0.1f, 0.1f, 0.1f, 1.0f};
+    glm::vec4 square_color{1.0f, 1.0f, 1.0f, 1.0f};
 
 public:
     Demo()
@@ -37,9 +37,9 @@ public:
         m_vertarr.reset(Seed::VertexArr::Create());
 
         // vertx buff
-        float vert[9 * 3] = {-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, //
-                             0.5f,  -0.5f, 0.0f, 0.4f, 0.8f, 1.2f, 0.5f, 0.0f, 1.0f, //
-                             0.0f,  0.5f,  0.0f, 0.0f, 7.0f, 0.0f, 1.0f, 1.0f, 0.0f};
+        float vert[9 * 3] = {-0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, //
+                             0.5f,  -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, //
+                             0.0f,  0.5f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f};
 
         std::shared_ptr<Seed::VertexBuffer> m_vbuff;
         m_vbuff.reset(Seed::VertexBuffer::Create(vert, sizeof(vert)));
@@ -94,7 +94,7 @@ public:
 
         m_SQva->SetIndexBuffer(m_sqibuff);
         m_toonmat.reset(Seed::Materials::Create(Seed::MaterialType::ToonShader));
-        m_texture.reset(Seed::Texture::Create("leaf/texture/checker.png"));
+        m_texture.reset(Seed::Texture::Create("leaf/texture/leaf.png"));
 
         m_Camera.SetPosition(cam_Pos);
         m_Camera.RecalcViewMatrix();
