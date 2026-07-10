@@ -106,6 +106,7 @@ public:
     void SetClearColor(const glm::vec4 color) override;
     void Clear() override;
     void Draw(const std::shared_ptr<VertexArr> &va) override;
+    void Init() override;
 };
 
 } // namespace Seed

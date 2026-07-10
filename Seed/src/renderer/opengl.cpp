@@ -5,9 +5,7 @@
 #include "renderer/buffer.h"
 #include <cstdint>
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
 #include <sstream>
-#include <streambuf>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -182,7 +180,7 @@ Gl_Texture2D::Gl_Texture2D(const std::string &path)
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     stbi_image_free(data);
@@ -201,6 +199,11 @@ void Gl_Texture2D::Unbind() const { glBindTexture(GL_TEXTURE_2D, 0); };
 //
 
 namespace Seed {
+
+void Gl_RendererAPI::Init() {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+};
 
 void Gl_RendererAPI::Clear() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); };
 void Gl_RendererAPI::SetClearColor(const glm::vec4 color) {

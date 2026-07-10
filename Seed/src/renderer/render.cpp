@@ -29,6 +29,7 @@ RenderCmd::RenderCmd() {
     //     };
 };
 
+void RenderCmd::Init() { s_instance->Init(); };
 void RenderCmd::SetClearColor(const glm::vec4 color) { s_instance->SetClearColor(color); };
 void RenderCmd::Clear() { s_instance->Clear(); }
 void RenderCmd::Draw(const std::shared_ptr<VertexArr> &va) { s_instance->Draw(va); };
@@ -40,10 +41,9 @@ void Renderer::OpenScene(const Scene &scene) {
     m_Scene->m_viewprojection_mat = scene.cam.GetVP_Mat();
 };
 
-void Renderer::Submit(const std::shared_ptr<VertexArr> &va,
-                      const std::shared_ptr<Materials> &mat,
-                      glm::vec3 transform,
-                      glm::vec3 scale,
+void Renderer::Init() { RenderCmd::Init(); };
+void Renderer::Submit(const std::shared_ptr<VertexArr> &va, const std::shared_ptr<Materials> &mat,
+                      glm::vec3 transform, glm::vec3 scale,
                       const std::shared_ptr<Texture> &texture) {
     va->Bind();
     std::shared_ptr<Shader> shade = mat->GetShader();

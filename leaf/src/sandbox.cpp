@@ -7,11 +7,9 @@
 
 class Demo : public Seed::Layer {
 private:
-    std::shared_ptr<Seed::VertexArr> m_vertarr;
-    std::shared_ptr<Seed::VertexArr> m_SQva;
-    std::shared_ptr<Seed::Materials> m_flatmat;
-    std::shared_ptr<Seed::Materials> m_toonmat;
-    std::shared_ptr<Seed::Texture> m_texture;
+    std::shared_ptr<Seed::VertexArr> m_vertarr, m_SQva;
+    std::shared_ptr<Seed::Materials> m_flatmat, m_toonmat;
+    std::shared_ptr<Seed::Texture> m_texture, m_texture1, m_texture2, m_texture3, m_texture5;
     Seed::PerspectiveCam m_Camera;
     // Seed::OrthographicCam m_Camera;
     glm::vec3 cam_Pos;
@@ -37,9 +35,9 @@ public:
         m_vertarr.reset(Seed::VertexArr::Create());
 
         // vertx buff
-        float vert[9 * 3] = {-0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, //
-                             0.5f,  -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, //
-                             0.0f,  0.5f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f};
+        float vert[9 * 3] = {-0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, //
+                             0.5f,  -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.5f, 0.5f, //
+                             0.0f,  0.5f,  0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
 
         std::shared_ptr<Seed::VertexBuffer> m_vbuff;
         m_vbuff.reset(Seed::VertexBuffer::Create(vert, sizeof(vert)));
@@ -82,8 +80,8 @@ public:
         std::shared_ptr<Seed::VertexBuffer> SQvb;
         SQvb.reset(Seed::VertexBuffer::Create(sq_vert, sizeof(sq_vert)));
         SQvb->SetLayout({{Seed::ShaderDataType::Float3, "m_Position", false},
-                         {Seed::ShaderDataType::Float4, "m_color", false},
-                         {Seed::ShaderDataType::Float2, "m_uv", false}});
+                         {Seed::ShaderDataType::Float4, "m_Color", false},
+                         {Seed::ShaderDataType::Float2, "m_Uv", false}});
 
         m_SQva->AddVertBuffer(SQvb);
 
@@ -94,7 +92,14 @@ public:
 
         m_SQva->SetIndexBuffer(m_sqibuff);
         m_toonmat.reset(Seed::Materials::Create(Seed::MaterialType::ToonShader));
-        m_texture.reset(Seed::Texture::Create("leaf/texture/leaf.png"));
+
+        //////////////////////
+        /// Text
+        //////////////////////
+        m_texture1.reset(Seed::Texture::Create("leaf/texture/kyomi1.png"));
+        m_texture2.reset(Seed::Texture::Create("leaf/texture/leaf.png"));
+        m_texture3.reset(Seed::Texture::Create("leaf/texture/kyomi.png"));
+        m_texture5.reset(Seed::Texture::Create("leaf/texture/kyomi2.png"));
 
         m_Camera.SetPosition(cam_Pos);
         m_Camera.RecalcViewMatrix();
@@ -166,18 +171,22 @@ public:
             for (int i = 0; i < 40; i++) {
                 if ((i + j) % 2 == 0) {
                     m_toonmat->SetColor(texture_color);
+                    m_texture = m_texture3;
                 } else {
                     m_toonmat->SetColor(square_color);
+                    m_texture = m_texture2;
                 }
                 Seed::Renderer::Submit(m_SQva, m_toonmat, {(float)i * 1.0f, (float)j * 1.0f, 1.0f},
-                                       glm::vec3(0.32f));
+                                       glm::vec3(0.32f), m_texture);
             };
         };
 
         // Submit(vertcs,maerial,tranform,scale)
         m_flatmat->SetColor(texture_color);
-        Seed::Renderer::Submit(m_SQva, m_flatmat, {-3, 0, 0}, glm::vec3(0.4f), m_texture);
-        Seed::Renderer::Submit(m_vertarr, m_flatmat, transform_Pos, glm::vec3{1.8f});
+        Seed::Renderer::Submit(m_SQva, m_flatmat, {-1.6, 0, 0}, glm::vec3(0.4f), m_texture5);
+        Seed::Renderer::Submit(m_SQva, m_flatmat, {-3, 1.5, 0}, glm::vec3(0.4f), m_texture1);
+        Seed::Renderer::Submit(m_SQva, m_flatmat, {-3, 0, 0}, glm::vec3(0.4f), m_texture5);
+        Seed::Renderer::Submit(m_vertarr, m_toonmat, transform_Pos, glm::vec3{1.8f}, m_texture5);
 
         Seed::Renderer::CloseScene();
     };

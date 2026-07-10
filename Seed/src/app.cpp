@@ -3,6 +3,7 @@
 #include "app.h"
 #include "events.h"
 #include "log.h"
+#include "render.h"
 #include "runtime.h"
 #include "ui.h"
 #include "window.h"
@@ -23,6 +24,8 @@ Application::Application() {
     seed_Window = std::unique_ptr<Window>(Window::Create());
     (*seed_Window).SetEventCallback(SEED_BIND_EVENT_FN(&Application::OnEvent));
     seed_Window->SetVSync(true);
+
+    Renderer::Init();
 
     seed_DuiLayer = new DebugUi();
     seed_DuiLayer->IsActive = true;

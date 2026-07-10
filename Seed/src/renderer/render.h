@@ -28,7 +28,7 @@ public:
     enum class API { None = 0, OpenGl = 1, Vulkan = 3 };
 
 public:
-    virtual ~RendererAPI() {};
+    virtual ~RendererAPI() = default;
     virtual void SetClearColor(const glm::vec4 color) = 0;
     virtual void Clear() = 0;
 
@@ -36,20 +36,35 @@ public:
 
     inline static API GetAPI() { return s_rendererAPI; };
 
-private:
+    virtual void Init() = 0;
+
     static API s_rendererAPI;
+
+private:
+};
+
+class RenderCmd {
+public:
+    RenderCmd();
+    static void Init();
+    static void SetClearColor(const glm::vec4 color);
+    static void Clear();
+
+    static void Draw(const std::shared_ptr<VertexArr> &va);
+
+private:
+    static std::unique_ptr<RendererAPI> s_instance;
 };
 
 class Renderer {
 public:
     inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); };
 
+    static void Init();
     static void OpenScene(const Scene &scene);
     static void Flush();
-    static void Submit(const std::shared_ptr<VertexArr> &va,
-                       const std::shared_ptr<Materials> &mat,
-                       glm::vec3 transform = glm::vec3(1.0f),
-                       glm::vec3 scale = glm::vec3(1.0f),
+    static void Submit(const std::shared_ptr<VertexArr> &va, const std::shared_ptr<Materials> &mat,
+                       glm::vec3 transform = glm::vec3(1.0f), glm::vec3 scale = glm::vec3(1.0f),
                        const std::shared_ptr<Texture> &texture = nullptr);
 
     static void CloseScene();
@@ -60,18 +75,5 @@ private:
     };
     static SceneData *m_Scene;
 };
-
-class RenderCmd {
-public:
-    RenderCmd();
-    static void SetClearColor(const glm::vec4 color);
-    static void Clear();
-
-    static void Draw(const std::shared_ptr<VertexArr> &va);
-
-private:
-    static std::unique_ptr<RendererAPI> s_instance;
-};
-
 } // namespace Seed
 //

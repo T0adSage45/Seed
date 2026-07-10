@@ -25,9 +25,10 @@ private:
 
     std::unique_ptr<Window> seed_Window;
     DebugUi *seed_DuiLayer;
-    bool seed_running = false;
 
+    bool seed_running = false;
     LayerStack l_stacks;
+
     std::chrono::time_point<std::chrono::steady_clock> lastframe_time;
 
 private:
