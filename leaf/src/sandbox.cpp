@@ -12,12 +12,9 @@ private:
     std::shared_ptr<Seed::Texture> m_texture, m_texture1, m_texture2, m_texture3, m_texture5;
     Seed::PerspectiveCam m_Camera;
     // Seed::OrthographicCam m_Camera;
-    glm::vec3 cam_Pos;
-    glm::vec3 cam_Rot;
-    glm::vec3 transform_Pos;
-    glm::vec4 texture_color{1.0f, 1.0f, 1.0f, 1.0f};
-    glm::vec4 clear_color{0.1f, 0.1f, 0.1f, 1.0f};
-    glm::vec4 square_color{1.0f, 1.0f, 1.0f, 1.0f};
+    glm::vec3 cam_Pos, cam_Rot, transform_Pos;
+    glm::vec4 texture_color{1.0f, 1.0f, 1.0f, 1.0f}, clear_color{0.1f, 0.1f, 0.1f, 1.0f},
+        square_color{1.0f, 1.0f, 1.0f, 1.0f};
 
 public:
     Demo()
@@ -96,6 +93,7 @@ public:
         //////////////////////
         /// Text
         //////////////////////
+        m_texture.reset(Seed::Texture::Create("leaf/texture/seede.png"));
         m_texture1.reset(Seed::Texture::Create("leaf/texture/kyomi1.png"));
         m_texture2.reset(Seed::Texture::Create("leaf/texture/leaf.png"));
         m_texture3.reset(Seed::Texture::Create("leaf/texture/kyomi.png"));
@@ -167,14 +165,12 @@ public:
 
         // update for bind values
 
-        for (int j = 0; j < 40; j++) {
-            for (int i = 0; i < 40; i++) {
+        for (int j = 0; j < 9; j++) {
+            for (int i = 0; i < 9; i++) {
                 if ((i + j) % 2 == 0) {
                     m_toonmat->SetColor(texture_color);
-                    m_texture = m_texture3;
                 } else {
                     m_toonmat->SetColor(square_color);
-                    m_texture = m_texture2;
                 }
                 Seed::Renderer::Submit(m_SQva, m_toonmat, {(float)i * 1.0f, (float)j * 1.0f, 1.0f},
                                        glm::vec3(0.32f), m_texture);
@@ -183,9 +179,9 @@ public:
 
         // Submit(vertcs,maerial,tranform,scale)
         m_flatmat->SetColor(texture_color);
-        Seed::Renderer::Submit(m_SQva, m_flatmat, {-1.6, 0, 0}, glm::vec3(0.4f), m_texture5);
+        Seed::Renderer::Submit(m_SQva, m_flatmat, {-1.6, 0, 0}, glm::vec3(0.4f), m_texture2);
         Seed::Renderer::Submit(m_SQva, m_flatmat, {-3, 1.5, 0}, glm::vec3(0.4f), m_texture1);
-        Seed::Renderer::Submit(m_SQva, m_flatmat, {-3, 0, 0}, glm::vec3(0.4f), m_texture5);
+        Seed::Renderer::Submit(m_SQva, m_flatmat, {-3, 0, 0}, glm::vec3(0.4f), m_texture3);
         Seed::Renderer::Submit(m_vertarr, m_toonmat, transform_Pos, glm::vec3{1.8f}, m_texture5);
 
         Seed::Renderer::CloseScene();

@@ -23,7 +23,7 @@
 #define SEED_CORE_ASSERT(x, ...)                                               \
     {                                                                          \
         if (!(x)) {                                                            \
-            Seed_Fatal("Assertion Failed: " #x __VA_OPT__(" - ") __VA_ARGS__); \
+            Seed_Error("Assertion Failed: " #x __VA_OPT__(" - ") __VA_ARGS__); \
         }                                                                      \
     }
 #else

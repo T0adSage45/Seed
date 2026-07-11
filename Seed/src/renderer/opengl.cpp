@@ -24,7 +24,7 @@ void GLcontext::Init() {
     glewInit();
 
     SDL_GL_MakeCurrent(m_seed_windowhandler, seed_glContext);
-    glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_DEPTH_TEST);
 
     Seed_Info("%s", glGetString(GL_VENDOR));
     Seed_Info("%s", glGetString(GL_RENDERER));
@@ -151,6 +151,12 @@ Gl_Texture2D::Gl_Texture2D(const std::string &path)
     unsigned char *data = stbi_load(path.c_str(), &width, &height, &channels, 0);
     SEED_CORE_ASSERT(data, "Texture failed to load");
 
+    if (!data) {
+        data = stbi_load("leaf/texture/checker.png", &width, &height, &channels, 0);
+    };
+
+    SEED_CORE_ASSERT(data, "Default Texture failed");
+
     m_Width = width;
     m_Height = height;
 
@@ -201,8 +207,12 @@ void Gl_Texture2D::Unbind() const { glBindTexture(GL_TEXTURE_2D, 0); };
 namespace Seed {
 
 void Gl_RendererAPI::Init() {
+    glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 };
 
 void Gl_RendererAPI::Clear() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); };
