@@ -11,7 +11,7 @@ namespace Seed {
 OrthographicCam::OrthographicCam(
     float left, float top, float bottom, float right, float near, float far)
     : m_Projection_Matrix(glm::orthoLH_ZO(left, top, bottom, right, near, far)) {
-    m_View_Matrix = (1.0f);
+    m_View_Matrix = glm::mat4(1.0f);
     m_ViewProj_Matrix = m_Projection_Matrix * m_View_Matrix;
 };
 

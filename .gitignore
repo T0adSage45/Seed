@@ -1,4 +1,5 @@
 build
+.cpm
 compile_commands.json
 .cache
 .clang-format

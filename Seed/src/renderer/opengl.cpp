@@ -367,7 +367,7 @@ void Gl_Shader::UploadUniform(const std::string name, const glm::mat4 mat) {
 
 void Gl_Shader::UploadUniform(const std::string name, const glm::vec1 vec) {
     GLuint loc = glGetUniformLocation(m_shaderID, name.c_str());
-    glUniform1fv(loc, 1, glm::value_ptr(vec));
+    glUniform1fv(loc, 1, &vec.x);
 };
 void Gl_Shader::UploadUniform(const std::string name, const glm::vec2 vec) {
     GLuint loc = glGetUniformLocation(m_shaderID, name.c_str());
