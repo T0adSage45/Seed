@@ -1,11 +1,10 @@
 #pragma once
 
-#include "shader.h"
 #include <glm/ext/vector_float4.hpp>
 
 namespace Seed {
 
-enum class MaterialType { FlatShader, ToonShader };
+enum class MaterialType { FlatShader, ToonShader, TextureShader };
 
 class Materials {
 public:
@@ -16,11 +15,11 @@ public:
     void SetColor(const glm::vec4 &color) { m_flatColor = color; };
     glm::vec4 GetColor() const { return m_flatColor; };
 
-    std::shared_ptr<Shader> GetShader() { return m_Shader; }
+    // std::shared_ptr<Shader> GetShader() { return m_Shader; }
 
 private:
     MaterialType m_type;
-    std::shared_ptr<Shader> m_Shader;
+    // std::shared_ptr<Shader> m_Shader;
     glm::vec4 m_flatColor;
 };
 

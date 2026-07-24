@@ -1,3 +1,6 @@
+#include "camera.h"
+#include "imgui.h"
+#include "shader.h"
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/vector_float3.hpp>
@@ -8,20 +11,19 @@
 class Demo : public Seed::Layer {
 private:
     std::shared_ptr<Seed::VertexArr> m_vertarr, m_SQva;
-    std::shared_ptr<Seed::Materials> m_flatmat, m_toonmat;
-    std::shared_ptr<Seed::Texture> m_texture, m_texture1, m_texture2, m_texture3, m_texture5;
-    Seed::PerspectiveCam m_Camera;
-    // Seed::OrthographicCam m_Camera;
-    glm::vec3 cam_Pos, cam_Rot, transform_Pos;
+    std::shared_ptr<Seed::Materials> m_flatmat, m_toonmat, m_texturemat;
+    std::shared_ptr<Seed::Shader> m_flatshade, m_toonshade, m_textureshade;
+    std::shared_ptr<Seed::Texture> m_texture, m_texture1, m_texture2, m_texture3, m_texture4,
+        m_texture5;
+    Seed::OrhtoCamCtrl m_CameraCtrl;
+    glm::vec3 transform_Pos;
     glm::vec4 texture_color{1.0f, 1.0f, 1.0f, 1.0f}, clear_color{0.1f, 0.1f, 0.1f, 1.0f},
         square_color{1.0f, 1.0f, 1.0f, 1.0f};
 
 public:
     Demo()
         : Layer("demo"),
-          m_Camera(glm::radians(45.0f), 700.0f / 700.0f, 1.0f, 100.0f),
-          // m_Camera(-5.0f, 5.0f, -5.0f, 5.0f),
-          cam_Pos(0.0f, 0.0f, -5.0f) {};
+          m_CameraCtrl(1200.0f / 720.0f) {};
     ~Demo() {};
 
     void OnDetach() override {};
@@ -53,7 +55,15 @@ public:
 
         m_vertarr->SetIndexBuffer(m_ibuff);
 
+        // Materials
         m_flatmat.reset(Seed::Materials::Create(Seed::MaterialType::FlatShader));
+        m_texturemat.reset(Seed::Materials::Create(Seed::MaterialType::TextureShader));
+        m_toonmat.reset(Seed::Materials::Create(Seed::MaterialType::ToonShader));
+
+        // Shader
+        m_flatshade.reset(Seed::Shader::Create());
+        m_toonshade.reset(Seed::Shader::Create("toon", "Seed/src/shader/toon.glsl"));
+        m_textureshade.reset(Seed::Shader::Create("texture", "Seed/src/shader/texture.glsl"));
 
         // next one
 
@@ -88,80 +98,27 @@ public:
         m_sqibuff->Bind();
 
         m_SQva->SetIndexBuffer(m_sqibuff);
-        m_toonmat.reset(Seed::Materials::Create(Seed::MaterialType::ToonShader));
 
         //////////////////////
         /// Text
         //////////////////////
-        m_texture.reset(Seed::Texture::Create("leaf/texture/seede.png"));
-        m_texture1.reset(Seed::Texture::Create("leaf/texture/kyomi1.png"));
+        m_texture.reset(Seed::Texture::Create("leaf/texture/checker.png"));
+        m_texture1.reset(Seed::Texture::Create("leaf/texture/seed.png"));
         m_texture2.reset(Seed::Texture::Create("leaf/texture/leaf.png"));
         m_texture3.reset(Seed::Texture::Create("leaf/texture/kyomi.png"));
+        m_texture4.reset(Seed::Texture::Create("leaf/texture/kyomi1.png"));
         m_texture5.reset(Seed::Texture::Create("leaf/texture/kyomi2.png"));
-
-        m_Camera.SetPosition(cam_Pos);
-        m_Camera.RecalcViewMatrix();
     };
 
-    void OnEvent(Seed::Event &e) override {};
+    void OnEvent(Seed::Event &e) override { m_CameraCtrl.OnEvent(e); };
 
     void OnUpdate(Seed::Timestep delta) override {
-        float speed = 2.0f * delta.GetSeconds();
-        cam_Pos = m_Camera.GetPosition();
-        cam_Rot = m_Camera.GetRotation();
-
-        if (Seed::InputManager::IsKeyPressed(Seed_KeyLeft)) {
-            cam_Pos.x += speed;
-            m_Camera.SetPosition(cam_Pos);
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyRight)) {
-            cam_Pos.x -= speed;
-            m_Camera.SetPosition(cam_Pos);
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyJ)) {
-            transform_Pos.x += speed;
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyK)) {
-            transform_Pos.x -= speed;
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyL)) {
-            transform_Pos.y += speed;
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyM)) {
-            transform_Pos.y -= speed;
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyUp)) {
-            cam_Pos.y -= speed;
-            m_Camera.SetPosition(cam_Pos);
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyDown)) {
-            cam_Pos.y += speed;
-            m_Camera.SetPosition(cam_Pos);
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyA)) {
-            cam_Pos.z += speed;
-            m_Camera.SetPosition(cam_Pos);
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyQ)) {
-            cam_Pos.z -= speed;
-            m_Camera.SetPosition(cam_Pos);
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyE)) {
-            cam_Rot.x += speed;
-            m_Camera.SetRotation(cam_Rot);
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyR)) {
-            cam_Rot.x -= speed;
-            m_Camera.SetRotation(cam_Rot);
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyD)) {
-            cam_Rot.y += speed;
-            m_Camera.SetRotation(cam_Rot);
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyF)) {
-            cam_Rot.y -= speed;
-            m_Camera.SetRotation(cam_Rot);
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyC)) {
-            cam_Rot.z += speed;
-            m_Camera.SetRotation(cam_Rot);
-        } else if (Seed::InputManager::IsKeyPressed(Seed_KeyV)) {
-            cam_Rot.z -= speed;
-            m_Camera.SetRotation(cam_Rot);
-        }
-
-        m_Camera.RecalcViewMatrix();
+        m_CameraCtrl.OnUpdate(delta);
 
         Seed::RenderCmd::SetClearColor(clear_color);
         Seed::RenderCmd::Clear();
 
-        Seed::Renderer::OpenScene(Seed::Scene{m_Camera});
+        Seed::Renderer::OpenScene(Seed::Scene{m_CameraCtrl.GetCamera()});
 
         // update for bind values
 
@@ -172,17 +129,24 @@ public:
                 } else {
                     m_toonmat->SetColor(square_color);
                 }
-                Seed::Renderer::Submit(m_SQva, m_toonmat, {(float)i * 1.0f, (float)j * 1.0f, 1.0f},
-                                       glm::vec3(0.32f), m_texture);
+                Seed::Renderer::Submit(m_SQva, m_textureshade, m_texturemat,
+                                       {(float)i * 1.0f, (float)j * 1.0f, 1.0f}, glm::vec3(0.32f),
+                                       m_texture);
             };
         };
 
         // Submit(vertcs,maerial,tranform,scale)
         m_flatmat->SetColor(texture_color);
-        Seed::Renderer::Submit(m_SQva, m_flatmat, {-1.6, 0, 0}, glm::vec3(0.4f), m_texture2);
-        Seed::Renderer::Submit(m_SQva, m_flatmat, {-3, 1.5, 0}, glm::vec3(0.4f), m_texture1);
-        Seed::Renderer::Submit(m_SQva, m_flatmat, {-3, 0, 0}, glm::vec3(0.4f), m_texture3);
-        Seed::Renderer::Submit(m_vertarr, m_toonmat, transform_Pos, glm::vec3{1.8f}, m_texture5);
+        Seed::Renderer::Submit(m_SQva, m_textureshade, m_flatmat, {-1.6, 0, 0}, glm::vec3(0.4f),
+                               m_texture5);
+        Seed::Renderer::Submit(m_SQva, m_textureshade, m_flatmat, {-3, 1.5, 0}, glm::vec3(0.4f),
+                               m_texture3);
+        Seed::Renderer::Submit(m_SQva, m_textureshade, m_flatmat, {-3, 0, 0}, glm::vec3(0.4f),
+                               m_texture2);
+        Seed::Renderer::Submit(m_SQva, m_textureshade, m_flatmat, {-5, 0, 0}, glm::vec3(0.4f),
+                               m_texture4);
+        Seed::Renderer::Submit(m_vertarr, m_flatshade, m_toonmat, transform_Pos, glm::vec3{1.8f},
+                               m_texture5);
 
         Seed::Renderer::CloseScene();
     };

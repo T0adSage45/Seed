@@ -11,3 +11,5 @@ flamegraph*
 lib/
 imgui.ini
 
+nix-prof*
+

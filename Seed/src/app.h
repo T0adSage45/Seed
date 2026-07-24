@@ -22,6 +22,8 @@ public:
 
 private:
     bool OnWindowClosed(Event &e);
+    bool OnWindowResized(Event &e);
+    bool OnWindowMoved(Event &e);
 
     std::unique_ptr<Window> seed_Window;
     DebugUi *seed_DuiLayer;

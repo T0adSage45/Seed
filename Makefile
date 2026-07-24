@@ -1,7 +1,7 @@
 #
 # nix env
 EXTRA_INCLUDES = \
-				 -I/nix/store/45npani18v2m7sbkrzrv2xyilyghrny9-gnumake-4.4.1/include \
+				 -I/nix/store/45npani18v2m7sbkrzrv2xyilyghrny9-gnumake-4.4.1/include  \
 				 -I/nix/store/24720qn3bfvkp4c1zv1c1mvg7kvdhpzv-sdl3-3.4.2-dev/include \
 				 -I/nix/store/hm1c2ngx8jpd4zqrhq5w84qslx5fqy51-perf-linux-6.19.11/include \
 				 -I/nix/store/8l5ycdza5db0jjd09lz1pcz2c1x004fj-libcxx-21.1.8-dev/include \
@@ -55,11 +55,11 @@ BASE_CXXFLAGS = $(CXX_STD) -Wall -Wextra -pedantic -fPIC \
 
 # Debug/Release Specific Flags
 ifeq ($(BUILD_TYPE), debug)
-    BUILD_CXXFLAGS = $(BASE_CXXFLAGS) -g
-    BUILD_LDFLAGS  = -g
+	BUILD_CXXFLAGS = $(BASE_CXXFLAGS) -g
+	BUILD_LDFLAGS  = -g
 else ifeq ($(BUILD_TYPE), release)
-    BUILD_CXXFLAGS = $(BASE_CXXFLAGS) -O3 -DNDEBUG
-    BUILD_LDFLAGS  =
+	BUILD_CXXFLAGS = $(BASE_CXXFLAGS) -O3 -DNDEBUG
+	BUILD_LDFLAGS  =
 endif
 
 CXXFLAGS = $(BUILD_CXXFLAGS)
@@ -71,29 +71,29 @@ SANDBOX_LDLIBS = -L$(LIB_DIR) -lseed $(BASE_LDLIBS)
 
 # LibSeed Source Files (Engine + ImGui Core + ImGui Backends + ImGui Demo)
 LIB_SRCS = \
-    Seed/src/app.cpp \
-    Seed/src/layerstack.cpp \
-    Seed/src/layers.cpp \
-    Seed/src/camera.cpp \
-    Seed/src/log.cpp \
-    Seed/src/ui/ui.cpp \
-    Seed/src/utility.cpp \
-    Seed/src/platform/Linux/linux_window.cpp \
-    Seed/src/platform/Linux/linux_input.cpp \
-    Seed/src/renderer/opengl.cpp \
-    Seed/src/renderer/render.cpp \
-    Seed/src/renderer/material.cpp \
-    Seed/src/renderer/texture.cpp \
-    Seed/src/renderer/buffer.cpp \
-    Seed/src/renderer/shader.cpp \
-    Seed/src/renderer/vulkan.cpp \
-    lib/imgui/imgui.cpp \
-    lib/imgui/imgui_demo.cpp \
-    lib/imgui/imgui_draw.cpp \
-    lib/imgui/imgui_tables.cpp \
-    lib/imgui/imgui_widgets.cpp \
-    lib/imgui/backends/imgui_impl_sdl3.cpp \
-    lib/imgui/backends/imgui_impl_opengl3.cpp
+		   Seed/src/app.cpp \
+		   Seed/src/layerstack.cpp \
+		   Seed/src/layers.cpp \
+		   Seed/src/camera.cpp \
+		   Seed/src/log.cpp \
+		   Seed/src/ui/ui.cpp \
+		   Seed/src/utility.cpp \
+		   Seed/src/platform/Linux/linux_window.cpp \
+		   Seed/src/platform/Linux/linux_input.cpp \
+		   Seed/src/renderer/opengl.cpp \
+		   Seed/src/renderer/render.cpp \
+		   Seed/src/renderer/material.cpp \
+		   Seed/src/renderer/texture.cpp \
+		   Seed/src/renderer/buffer.cpp \
+		   Seed/src/renderer/shader.cpp \
+		   Seed/src/renderer/vulkan.cpp \
+		   lib/imgui/imgui.cpp \
+		   lib/imgui/imgui_demo.cpp \
+		   lib/imgui/imgui_draw.cpp \
+		   lib/imgui/imgui_tables.cpp \
+		   lib/imgui/imgui_widgets.cpp \
+		   lib/imgui/backends/imgui_impl_sdl3.cpp \
+		   lib/imgui/backends/imgui_impl_opengl3.cpp
 
 # LibSeed Object/Dependency Files (Preserve Source Directory Structure)
 LIB_OBJS = $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(LIB_SRCS))
@@ -165,7 +165,7 @@ $(SANDBOX_TARGET): $(SANDBOX_OBJS) $(LIB_TARGET) | $(BIN_DIR)
 
 # App
 app: sandbox $(LIB_TARGET)
-		$(CXX) -fno-omit-frame-pointer $(SANDBOX_OBJS) $(LIB_TARGET) -o $(BIN_DIR)/$@
+	$(CXX) -fno-omit-frame-pointer $(SANDBOX_OBJS) $(LIB_TARGET) -o $(BIN_DIR)/$@
 
 # Run Sandbox
 run: sandbox
