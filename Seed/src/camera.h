@@ -1,7 +1,9 @@
 #pragma once
+#include "events.h"
 #include "pch.h"
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/vector_float3.hpp"
+#include "runtime.h"
 
 namespace Seed {
 
@@ -12,9 +14,11 @@ public:
 
 class OrthographicCam : public Camera {
 public:
-    OrthographicCam(
-        float left, float top, float bottom, float right, float near = 1.0f, float far = 100.0);
+    OrthographicCam(float left, float top, float bottom, float right, float near = 1.0f,
+                    float far = 100.0);
 
+    void SetProjection(float left, float top, float bottom, float right, float near = 1.0f,
+                       float far = 100.0);
     const glm::vec3 &GetPosition() const { return m_Position; };
     void SetPosition(const glm::vec3 &pos) { m_Position = pos; };
 
@@ -59,6 +63,32 @@ private:
 
     glm::vec3 m_Position;
     glm::vec3 m_Rotation;
+};
+
+class OrhtoCamCtrl {
+public:
+    OrhtoCamCtrl(float aspect_ratio, bool rotation = false);
+
+    void OnUpdate(Timestep t);
+    void OnEvent(Seed::Event &e);
+
+    OrthographicCam &GetCamera() { return m_cam; };
+    const OrthographicCam &GetCamera() const { return m_cam; };
+
+private:
+    bool OnMouseScrolled(MouseScrolledEvent &e);
+    bool OnWindowResized(WindowResizedEvent &e);
+
+private:
+    float m_zoom = 1.0f;
+    bool m_rotation;
+    float m_aspect_ratio;
+    OrthographicCam m_cam;
+
+    glm::vec3 m_camPos{0.0f};
+    glm::vec3 m_camRot{0.0f};
+
+    float m_camSpeed;
 };
 
 } // namespace Seed

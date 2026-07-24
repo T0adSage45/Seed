@@ -1,9 +1,10 @@
 #include "linux_input.h"
+#include "SDL3/SDL_events.h"
 #include "SDL3/SDL_keyboard.h"
 #include "SDL3/SDL_mouse.h"
+#include "events.h"
 #include "input.h"
 #include "keycode.h"
-#include <iostream>
 
 namespace Seed {
 
@@ -32,6 +33,10 @@ std::pair<float, float> Linux_Input::GetMousePosImpl() {
     float x, y;
     SDL_GetMouseState(&x, &y);
     return std::pair(x, y);
+};
+
+float Linux_Input::IsMouseScroll() {
+
 };
 
 } // namespace Seed

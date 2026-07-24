@@ -10,6 +10,7 @@ protected:
     virtual bool IsKeyPressedImpl(int keycode) override;
     virtual bool IsMousePressedImpl(int button) override;
     virtual std::pair<float, float> GetMousePosImpl() override;
+    virtual float IsMouseScroll() override;
 };
 
 } // namespace Seed

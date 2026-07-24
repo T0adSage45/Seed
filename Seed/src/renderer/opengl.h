@@ -1,5 +1,6 @@
 #pragma once
 #include "pch.h"
+#include "GL/glew.h"
 #include "SDL3/SDL_video.h"
 #include "buffer.h"
 #include "render.h"
@@ -9,7 +10,6 @@
 #include <glm/ext/vector_float3.hpp>
 
 namespace Seed {
-
 class GLcontext : public RenderingContext {
 public:
     GLcontext(SDL_Window *windowHandler);
@@ -115,11 +115,15 @@ namespace Seed {
 
 class Gl_Shader : public Shader {
 public:
-    Gl_Shader(const std::string &vertexSrc, const std::string &fragmentSrc);
+    static GLenum ShaderTypeFromString(std::string &type);
+
+    Gl_Shader(const std::string &name, const std::string &filepath);
     virtual ~Gl_Shader();
 
-    virtual void Bind() const;
-    virtual void UnBind() const;
+    virtual void Bind() const override;
+    virtual void UnBind() const override;
+
+    virtual const std::string GetName() const override { return m_Name; };
 
     void UploadUniform(const std::string name, const glm::mat2 mat);
     void UploadUniform(const std::string name, const glm::mat3 mat);
@@ -132,5 +136,6 @@ public:
 
 private:
     uint32_t m_shaderID;
+    std::string m_Name;
 };
 } // namespace Seed

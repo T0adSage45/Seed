@@ -4,6 +4,7 @@
 #include "camera.h"
 #include "renderer/buffer.h"
 #include "renderer/texture.h"
+#include "shader.h"
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/vec4.hpp>
 
@@ -19,6 +20,7 @@ public:
     virtual void Init() = 0;
     virtual void Swapbuffer() = 0;
 
+    // TODO:: Abstract it
     SDL_GLContext seed_glContext;
 };
 
@@ -63,8 +65,9 @@ public:
     static void Init();
     static void OpenScene(const Scene &scene);
     static void Flush();
-    static void Submit(const std::shared_ptr<VertexArr> &va, const std::shared_ptr<Materials> &mat,
-                       glm::vec3 transform = glm::vec3(1.0f), glm::vec3 scale = glm::vec3(1.0f),
+    static void Submit(const std::shared_ptr<VertexArr> &va, std::shared_ptr<Shader> &shader,
+                       const std::shared_ptr<Materials> &mat, glm::vec3 transform = glm::vec3(1.0f),
+                       glm::vec3 scale = glm::vec3(1.0f),
                        const std::shared_ptr<Texture> &texture = nullptr);
 
     static void CloseScene();
