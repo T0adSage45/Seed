@@ -39,13 +39,14 @@ PCH_OUTPUT = $(PCH_DIR)/pch.h.pch
 # Output Targets
 LIB_TARGET    = $(LIB_DIR)/libseed.so
 SANDBOX_TARGET = $(BIN_DIR)/leaf
+PHYLL_TARGET = $(BIN_DIR)/phyll
 
 # Hybrid Nix/System SDL3 Configuration (pkg-config works in Nix shells and on system)
 PKG_CFLAGS = $(shell pkg-config sdl3 gl --cflags vulkan shaderc 2>/dev/null || echo "-I/usr/include/SDL3")
 PKG_LIBS   = $(shell pkg-config sdl3 gl --libs 2>/dev/null || echo "-lSDL3")
 
 # Include Paths (Engine + ImGui + ImGui Backends + SDL3)
-INCLUDES = -ISeed -ISeed/src -ISeed/src/ui  -Ilib -Ilib/imgui -Ilib/imgui/backends -ISeed/src/platform/Linux -ISeed/src/renderer $(PKG_CFLAGS) $(EXTRA_INCLUDES)
+INCLUDES = -ISeed -ISeed/src -ISeed/src/ui  -Ilib -Ilib/imgui -Ilib/imgui/backends -ISeed/src/platform -ISeed/src/renderer $(PKG_CFLAGS) $(EXTRA_INCLUDES)
 
 # Base Compiler Flags
 BASE_CXXFLAGS = $(CXX_STD) -Wall -Wextra -pedantic -fPIC \
@@ -68,25 +69,28 @@ CXXFLAGS = $(BUILD_CXXFLAGS)
 BASE_LDLIBS = -lGL -lGLEW -ldl $(PKG_LIBS)
 LIB_LDLIBS = $(BASE_LDLIBS)
 SANDBOX_LDLIBS = -L$(LIB_DIR) -lseed $(BASE_LDLIBS)
+PHYLL_LDLIBS = -L$(LIB_DIR) -lseed $(BASE_LDLIBS)
 
 # LibSeed Source Files (Engine + ImGui Core + ImGui Backends + ImGui Demo)
 LIB_SRCS = \
 		   Seed/src/app.cpp \
-		   Seed/src/layerstack.cpp \
-		   Seed/src/layers.cpp \
-		   Seed/src/camera.cpp \
+		   Seed/src/layers/layerstack.cpp \
+		   Seed/src/layers/layers.cpp \
+		   Seed/src/camera/camera.cpp \
 		   Seed/src/log.cpp \
 		   Seed/src/ui/ui.cpp \
-		   Seed/src/utility.cpp \
-		   Seed/src/platform/Linux/linux_window.cpp \
-		   Seed/src/platform/Linux/linux_input.cpp \
+		   Seed/src/utility/utility.cpp \
+		   Seed/src/utility/keys.cpp \
+		   Seed/src/platform/linux_window.cpp \
+		   Seed/src/platform/linux_input.cpp \
 		   Seed/src/renderer/opengl.cpp \
 		   Seed/src/renderer/render.cpp \
 		   Seed/src/renderer/material.cpp \
 		   Seed/src/renderer/texture.cpp \
-		   Seed/src/renderer/buffer.cpp \
-		   Seed/src/renderer/shader.cpp \
 		   Seed/src/renderer/vulkan.cpp \
+		   Seed/src/buffers/buffer.cpp \
+		   Seed/src/buffers/buffer_Gl.cpp \
+		   Seed/src/shader/shader.cpp \
 		   lib/imgui/imgui.cpp \
 		   lib/imgui/imgui_demo.cpp \
 		   lib/imgui/imgui_draw.cpp \
@@ -99,16 +103,22 @@ LIB_SRCS = \
 LIB_OBJS = $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(LIB_SRCS))
 LIB_DEPS = $(LIB_OBJS:.o=.d)
 
-# Sandbox Source Files
+# Leaf Source Files
 SANDBOX_SRCS = leaf/src/sandbox.cpp
 SANDBOX_OBJS = $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(SANDBOX_SRCS))
 SANDBOX_DEPS = $(SANDBOX_OBJS:.o=.d)
 
+# Chlorophyll Source Files
+PHYLL_SRCS = chlorophyll/src/phyll.cpp
+PHYLL_OBJS = $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(PHYLL_SRCS))
+PHYLL_DEPS = $(PHYLL_OBJS:.o=.d)
+
+
 # Phony Targets (Non-file Targets)
-.PHONY: all init lib sandbox run clean rebuild debug release help perf-record flamegraph
+.PHONY: all init lib sandbox phyll run clean rebuild debug release help perf-record flamegraph
 
 # Default Target
-all: lib sandbox
+all: lib sandbox phyll
 
 # Help
 help:
@@ -117,7 +127,8 @@ help:
 	@echo "  init              Initialize git submodules (ImGui)"
 	@echo "  lib               Build libseed.so only"
 	@echo "  sandbox           Build leaf sandbox only"
-	@echo "  run               Build and run leaf sandbox"
+	@echo "  phyll           Build chlorophyll phyll only"
+	@echo "  run               Build and run leaf sandbox phyll"
 	@echo "  clean             Remove build directory"
 	@echo "  rebuild           Clean and rebuild all"
 	@echo "  debug             Build debug mode (assertions + symbols)"
@@ -156,21 +167,28 @@ $(LIB_TARGET): $(LIB_OBJS) | $(LIB_DIR)
 	@echo "Linking $(LIB_TARGET)..."
 	$(CXX) -shared $(LIB_OBJS) -o $@ $(BUILD_LDFLAGS) $(LIB_LDLIBS)
 
-# Build Sandbox Executable
+# Build Leaf Executable
 sandbox: $(SANDBOX_TARGET)
 
 $(SANDBOX_TARGET): $(SANDBOX_OBJS) $(LIB_TARGET) | $(BIN_DIR)
 	@echo "Linking $(SANDBOX_TARGET)..."
 	$(CXX) $(SANDBOX_OBJS) -o $@ $(BUILD_LDFLAGS) $(SANDBOX_LDLIBS)
 
+phyll: $(PHYLL_TARGET)
+
+$(PHYLL_TARGET): $(PHYLL_OBJS) $(LIB_TARGET) | $(BIN_DIR)
+	@echo "Linking $(PHYLL_TARGET)..."
+	$(CXX) $(PHYLL_OBJS) -o $@ $(BUILD_LDFLAGS) $(PHYLL_LDLIBS)
+
 # App
 app: sandbox $(LIB_TARGET)
 	$(CXX) -fno-omit-frame-pointer $(SANDBOX_OBJS) $(LIB_TARGET) -o $(BIN_DIR)/$@
 
-# Run Sandbox
+# Run Leaf
 run: sandbox
 	@echo "Running leaf sandbox..."
 	LD_LIBRARY_PATH=$(LIB_DIR) $(SANDBOX_TARGET)
+	# LD_LIBRARY_PATH=$(LIB_DIR) $(PHYLL_TARGET)
 
 # Clean Build Artifacts
 clean:
