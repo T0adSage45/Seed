@@ -1,0 +1,30 @@
+# CPM Package Configuration
+
+[project]
+name = "test"
+version = "0.1.0"
+description = ""
+cpp_standard = "20"
+entry = "Seed/src/init.h"
+output = "test"
+
+[scripts]
+start = "./test"
+
+[dependencies]
+# Header-only libraries (just download, no build needed)
+# Format: name = "github:user/repo@version"
+glm   = "github:g-truc/glm@0.9.9.8"
+imgui = "github:ocornut/imgui@docking"
+stb   = "github:nothings/stb"
+
+[system-dependencies]
+# Compiled libraries built from source inside .cpm/
+# Format: name = "github:user/repo@version"
+sdl3 = "github:libsdl-org/SDL@release-3.2.14"
+
+[libs]
+# System libraries resolved via nix — headers + .so linked into .cpm/ automatically
+# Format: name = "nix-package-name"
+glew   = "glew"
+opengl = "libGL"

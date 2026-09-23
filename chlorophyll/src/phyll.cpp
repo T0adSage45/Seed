@@ -33,7 +33,12 @@ public:
 
     void OnEvent(Seed::Event &e) override { (void)&e; };
 
-    void OnUpdate(Seed::Timestep delta) override { (void)&delta; };
+    void OnUpdate(Seed::Timestep delta) override {
+        (void)&delta;
+
+        Seed::RenderCmd::SetClearColor({.2f, .2f, .2f, 1.0f});
+        Seed::RenderCmd::Clear();
+    };
 
     void OnImGuiDrawCall() override {};
 };

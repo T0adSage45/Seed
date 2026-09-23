@@ -188,7 +188,7 @@ app: sandbox $(LIB_TARGET)
 run: sandbox
 	@echo "Running leaf sandbox..."
 	LD_LIBRARY_PATH=$(LIB_DIR) $(SANDBOX_TARGET)
-	# LD_LIBRARY_PATH=$(LIB_DIR) $(PHYLL_TARGET)
+	LD_LIBRARY_PATH=$(LIB_DIR) $(PHYLL_TARGET)
 
 # Clean Build Artifacts
 clean:
