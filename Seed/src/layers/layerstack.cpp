@@ -20,7 +20,7 @@ void LayerStack::PushOverlay(Layer *o) {
 
 void LayerStack::PopLayer(Layer *l) {
     auto it = std::find_if(layerstack.begin(), layerstack.end(),
-                           [l](const std::unique_ptr<Layer> &ptr) { return ptr.get() == l; });
+                           [l](const Seed::Scope<Layer> &ptr) { return ptr.get() == l; });
 
     if (it != layerstack.end()) {
         (*it)->OnDetach();
@@ -31,7 +31,7 @@ void LayerStack::PopLayer(Layer *l) {
 
 void LayerStack::PopOverlay(Layer *o) {
     auto it = std::find_if(layerstack.begin(), layerstack.end(),
-                           [o](const std::unique_ptr<Layer> &ptr) { return ptr.get() == o; });
+                           [o](const Seed::Scope<Layer> &ptr) { return ptr.get() == o; });
     if (it != layerstack.end()) {
         (*it)->OnDetach();
         layerstack.erase(it);

@@ -1,11 +1,12 @@
 #pragma once
 #include "materials.h"
 #include "SDL3/SDL_video.h"
-#include "camera.h"
-#include "renderer/buffer.h"
+#include "camera/camera.h"
+#include "buffers/buffer.h"
 #include "renderer/texture.h"
-#include "shader.h"
+#include "shader/shader.h"
 #include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <glm/vec4.hpp>
 
 namespace Seed {
@@ -34,7 +35,7 @@ public:
     virtual void SetClearColor(const glm::vec4 color) = 0;
     virtual void Clear() = 0;
 
-    virtual void Draw(const std::shared_ptr<VertexArr> &va) = 0;
+    virtual void Draw(const Seed::Ref<VertexArr> &va) = 0;
 
     inline static API GetAPI() { return s_rendererAPI; };
 
@@ -52,10 +53,10 @@ public:
     static void SetClearColor(const glm::vec4 color);
     static void Clear();
 
-    static void Draw(const std::shared_ptr<VertexArr> &va);
+    static void Draw(const Seed::Ref<VertexArr> &va);
 
 private:
-    static std::unique_ptr<RendererAPI> s_instance;
+    static Seed::Scope<RendererAPI> s_instance;
 };
 
 class Renderer {
@@ -65,10 +66,8 @@ public:
     static void Init();
     static void OpenScene(const Scene &scene);
     static void Flush();
-    static void Submit(const std::shared_ptr<VertexArr> &va, std::shared_ptr<Shader> &shader,
-                       const std::shared_ptr<Materials> &mat, glm::vec3 transform = glm::vec3(1.0f),
-                       glm::vec3 scale = glm::vec3(1.0f),
-                       const std::shared_ptr<Texture> &texture = nullptr);
+    static void Submit(const Seed::Ref<VertexArr> &va, Seed::Ref<Shader> &shader, glm::vec3 transform = glm::vec3(1.0f),
+                       glm::vec3 scale = glm::vec3(1.0f), const Seed::Ref<Texture> &texture = nullptr);
 
     static void CloseScene();
 
@@ -78,5 +77,19 @@ private:
     };
     static SceneData *m_Scene;
 };
+
+class Renderer2D {
+public:
+    inline static RendererAPI::API GetAPI() { return RendererAPI::GetAPI(); };
+
+    static void Init();
+    static void OpenScene(const Scene &scene);
+    static void DrawQuad(Seed::Ref<Shader> &shader, const Seed::Ref<Texture> &texture = nullptr,
+                         glm::vec2 TextCoord = {0.f, 0.f}, glm::vec2 size = {1.f, 1.f},
+                         glm::vec3 transform = glm::vec3(0.0f), glm::vec3 scale = glm::vec3(1.0f));
+
+    static void CloseScene();
+};
+
 } // namespace Seed
 //

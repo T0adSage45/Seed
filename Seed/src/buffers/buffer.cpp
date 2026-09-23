@@ -1,11 +1,12 @@
 #include "buffer.h"
+#include "buffers/buffer_Gl.h"
 #include "log.h"
 #include "render.h"
-#include "opengl.h"
 #include <cstdint>
 
 namespace Seed {
 
+// VertexBuffer //
 VertexBuffer *VertexBuffer::Create(float *verts, uint32_t size) {
     switch (RendererAPI::GetAPI()) {
     case RendererAPI::API::None:
@@ -22,6 +23,23 @@ VertexBuffer *VertexBuffer::Create(float *verts, uint32_t size) {
     return nullptr;
 };
 
+VertexBuffer *VertexBuffer::Create(uint32_t size) {
+    switch (RendererAPI::GetAPI()) {
+    case RendererAPI::API::None:
+        Seed_Trace("not suppourted right now");
+        break;
+    case RendererAPI::API::OpenGl:
+        return new Gl_VertexBuffer(size);
+    case RendererAPI::API::Vulkan:
+        Seed_Trace("not suppourted right now");
+        break;
+    }
+
+    Seed_Trace("buffer Intialization issue");
+    return nullptr;
+};
+
+// IndexBuffer //
 IndexBuffer *IndexBuffer::Create(uint32_t *indices, uint32_t size) {
     switch (RendererAPI::GetAPI()) {
     case RendererAPI::API::None:
@@ -38,6 +56,24 @@ IndexBuffer *IndexBuffer::Create(uint32_t *indices, uint32_t size) {
     return nullptr;
 };
 
+// FrameBuffers //
+FrameBuffers *FrameBuffers::Create(___Seed_FrameBuff_Specs__ &fbspec) {
+    switch (RendererAPI::GetAPI()) {
+    case RendererAPI::API::None:
+        Seed_Trace("not suppourted right now");
+        break;
+    case RendererAPI::API::OpenGl:
+        return new Gl_FrameBuffers(fbspec);
+    case RendererAPI::API::Vulkan:
+        Seed_Trace("not suppourted right now");
+        break;
+    }
+
+    Seed_Trace("buffer Intialization issue");
+    return nullptr;
+};
+
+// VertexArr //
 VertexArr *VertexArr::Create() {
     switch (RendererAPI::GetAPI()) {
     case RendererAPI::API::None:

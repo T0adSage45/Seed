@@ -1,6 +1,7 @@
 #pragma once
 #include <pch.h>
-#include "layerstack.h"
+#include "events.h"
+#include "layers/layerstack.h"
 #include "ui.h"
 #include "window.h"
 
@@ -21,14 +22,15 @@ public:
     inline void PushOverlay(Layer *o) { l_stacks.PushOverlay(o); };
 
 private:
-    bool OnWindowClosed(Event &e);
-    bool OnWindowResized(Event &e);
-    bool OnWindowMoved(Event &e);
+    bool OnWindowClosed(WindowClosedEvent &e);
+    bool OnWindowResized(WindowResizedEvent &e);
+    bool OnWindowMoved(WindowMovedEvent &e);
 
-    std::unique_ptr<Window> seed_Window;
+    Seed::Scope<Window> seed_Window;
     DebugUi *seed_DuiLayer;
 
     bool seed_running = false;
+    bool m_minimized = false;
     LayerStack l_stacks;
 
     std::chrono::time_point<std::chrono::steady_clock> lastframe_time;

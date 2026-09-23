@@ -2,14 +2,11 @@
 #include "GL/glew.h"
 #include "core.h"
 #include "log.h"
-#include "renderer/buffer.h"
+#include "utility/utility.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <fstream>
 #include <glm/gtc/type_ptr.hpp>
-#include <ios>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -49,108 +46,6 @@ SDL_GLContext GLcontext::GetGlContext() { return seed_glContext; };
 
 namespace Seed {
 
-Gl_VertexBuffer::Gl_VertexBuffer(float *vertices, uint32_t size) {
-    glGenBuffers(1, &m_RenderID);
-    glBindBuffer(GL_ARRAY_BUFFER, m_RenderID);
-    glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
-};
-
-Gl_VertexBuffer::~Gl_VertexBuffer() { glDeleteBuffers(1, &m_RenderID); };
-
-void Gl_VertexBuffer::Bind() const { glBindBuffer(GL_ARRAY_BUFFER, m_RenderID); };
-
-void Gl_VertexBuffer::UnBind() const { glBindBuffer(GL_ARRAY_BUFFER, 0); };
-} // namespace Seed
-//
-
-namespace Seed {
-
-Gl_IndexBuffer::Gl_IndexBuffer(uint32_t *indices, uint32_t count)
-    : m_count(count) {
-    glGenBuffers(1, &m_RenderID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RenderID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
-};
-
-Gl_IndexBuffer::~Gl_IndexBuffer() { glDeleteBuffers(1, &m_RenderID); };
-
-void Gl_IndexBuffer::Bind() const { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RenderID); };
-
-void Gl_IndexBuffer::UnBind() const { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); };
-} // namespace Seed
-//
-
-namespace Seed {
-
-static GLenum ShaderDataTypeToGlBaseType(ShaderDataType type) {
-    switch (type) {
-    case Seed::ShaderDataType::Float:
-        return GL_FLOAT;
-    case Seed::ShaderDataType::Float2:
-        return GL_FLOAT;
-    case Seed::ShaderDataType::Float3:
-        return GL_FLOAT;
-    case Seed::ShaderDataType::Float4:
-        return GL_FLOAT;
-    case Seed::ShaderDataType::Mat3:
-        return GL_FLOAT;
-    case Seed::ShaderDataType::Mat4:
-        return GL_FLOAT;
-    case Seed::ShaderDataType::Int:
-        return GL_INT;
-    case Seed::ShaderDataType::Int2:
-        return GL_INT;
-    case Seed::ShaderDataType::Int3:
-        return GL_INT;
-    case Seed::ShaderDataType::Int4:
-        return GL_INT;
-    case Seed::ShaderDataType::Bool:
-        return GL_BOOL;
-    case Seed::ShaderDataType::None:
-        return GL_NONE;
-    }
-    SEED_CORE_ASSERT(false, "UnkownShader type");
-    return 0;
-};
-
-Gl_VertArr::Gl_VertArr() { glGenVertexArrays(1, &m_RenderID); };
-
-Gl_VertArr::~Gl_VertArr() { glDeleteVertexArrays(1, &m_RenderID); };
-
-void Gl_VertArr::Bind() const { glBindVertexArray(m_RenderID); };
-
-void Gl_VertArr::UnBind() const { glBindVertexArray(0); };
-
-void Gl_VertArr::AddVertBuffer(const std::shared_ptr<VertexBuffer> &vertbuf) {
-
-    SEED_CORE_ASSERT(vertbuf->GetLayout().GetElems().size(), "vertex buff has no layouts");
-
-    glBindVertexArray(m_RenderID);
-    vertbuf->Bind();
-
-    uint32_t i = 0;
-    for (const auto &elem : vertbuf->GetLayout()) {
-        glEnableVertexAttribArray(i);
-        glVertexAttribPointer(i, elem.GetCompCount(), ShaderDataTypeToGlBaseType(elem.Type),
-                              elem.Normalized ? GL_TRUE : GL_FALSE,
-                              vertbuf->GetLayout().GetStride(), (const void *)elem.Offset);
-        i++;
-    };
-
-    m_vertbuff.push_back(vertbuf);
-};
-void Gl_VertArr::SetIndexBuffer(const std::shared_ptr<IndexBuffer> &indexbuf) {
-
-    glBindVertexArray(m_RenderID);
-    indexbuf->Bind();
-    m_indexbuff = indexbuf;
-};
-
-} // namespace Seed
-//
-
-namespace Seed {
-
 Gl_Texture2D::Gl_Texture2D(const std::string &path)
     : m_Path(path) {
     int width, height, channels;
@@ -166,6 +61,8 @@ Gl_Texture2D::Gl_Texture2D(const std::string &path)
 
     m_Width = width;
     m_Height = height;
+
+    // Seed_Info("w: %d, h: %d ", width, height);
 
     GLenum internalFormat = 0, dataFormat = 0;
     if (channels == 4) {
@@ -187,14 +84,14 @@ Gl_Texture2D::Gl_Texture2D(const std::string &path)
 
     glGenTextures(1, &m_RendererID);
     glBindTexture(GL_TEXTURE_2D, m_RendererID);
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE,
-                 data);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
+
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     stbi_image_free(data);
 };
@@ -214,21 +111,21 @@ void Gl_Texture2D::Unbind() const { glBindTexture(GL_TEXTURE_2D, 0); };
 namespace Seed {
 
 void Gl_RendererAPI::Init() {
+    bool wireframe = false;
+
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
-
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+
+    wireframe ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 };
 
 void Gl_RendererAPI::Clear() { glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); };
-void Gl_RendererAPI::SetClearColor(const glm::vec4 color) {
-    glClearColor(color.r, color.g, color.b, color.a);
-};
-void Gl_RendererAPI::Draw(const std::shared_ptr<VertexArr> &va) {
-    glDrawElements(GL_TRIANGLES, va->GetIndexBuf()->GetCount(), GL_UNSIGNED_INT, nullptr);
-};
+void Gl_RendererAPI::SetClearColor(const glm::vec4 color) { glClearColor(color.r, color.g, color.b, color.a); };
+void Gl_RendererAPI::Draw(const Seed::Ref<VertexArr> &va) { glDrawElements(GL_TRIANGLES, va->GetIndexBuf()->GetCount(), GL_UNSIGNED_INT, nullptr); };
 
 } // namespace Seed
 //
@@ -246,20 +143,8 @@ GLenum Gl_Shader::ShaderTypeFromString(std::string &type) {
 
 Gl_Shader::Gl_Shader(const std::string &name, const std::string &filepath) {
 
-    // open file
     std::string result;
-    std::ifstream fs(filepath, std::ios::binary);
-    SEED_CORE_ASSERT(fs, "No valid filepath");
-
-    if (fs) {
-        fs.seekg(0, std::ios::end);
-        result.resize(fs.tellg());
-        fs.seekg(0, std::ios::beg);
-        fs.read(&result[0], result.size());
-        fs.close();
-    }
-
-    // pre-proc file
+    Read_File(filepath, result);
 
     {
         std::unordered_map<GLenum, std::string> shaderSources;
@@ -270,17 +155,15 @@ Gl_Shader::Gl_Shader(const std::string &name, const std::string &filepath) {
 
         while (pos != std::string::npos) {
             size_t eol = result.find_first_of("\r\n", pos);
-            SEED_CORE_ASSERT(eol != std::string::npos, "Syntax Error in shader: %s",
-                             filepath.c_str());
+            SEED_CORE_ASSERT(eol != std::string::npos, "Syntax Error in shader: %s", filepath.c_str());
             size_t begin = pos + typeTokenLen + 1;
             std::string type = result.substr(begin, eol - begin);
             SEED_CORE_ASSERT(ShaderTypeFromString(type), "Invalid shader specification...");
 
             size_t nextlinePos = result.find_first_not_of("\r\n", eol);
             pos = result.find(typeToken, nextlinePos);
-            shaderSources[ShaderTypeFromString(type)] = result.substr(
-                nextlinePos,
-                pos - (nextlinePos == std::string::npos ? result.size() - 1 : nextlinePos));
+            shaderSources[ShaderTypeFromString(type)] =
+                result.substr(nextlinePos, pos - (nextlinePos == std::string::npos ? result.size() - 1 : nextlinePos));
         }
 
         GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);

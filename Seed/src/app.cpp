@@ -22,7 +22,7 @@ Application::Application() {
     }
 
     Seed_Trace("application class triggered");
-    seed_Window = std::unique_ptr<Window>(Window::Create());
+    seed_Window = Seed::Scope<Window>(Window::Create());
     (*seed_Window).SetEventCallback(SEED_BIND_EVENT_FN(&Application::OnEvent));
     seed_Window->SetVSync(true);
 
@@ -67,11 +67,13 @@ void Application::Run() {
         auto curr_timestamp = std::chrono::steady_clock::now();
         Timestep delta = std::chrono::duration<float>(curr_timestamp - lastframe_time).count();
 
-        for (auto &layout : l_stacks) {
-            if (layout->IsActive) {
-                layout->OnUpdate(delta);
+        if (!m_minimized) {
+            for (auto &layout : l_stacks) {
+                if (layout->IsActive) {
+                    layout->OnUpdate(delta);
+                }
             }
-        }
+        };
 
         seed_DuiLayer->Begin();
         for (auto &layout : l_stacks) {
@@ -82,21 +84,33 @@ void Application::Run() {
         seed_DuiLayer->End();
         seed_Window->OnUpdate(delta);
         lastframe_time = curr_timestamp;
+        // Seed_Fatal("force stop");
     }
 }
 
-bool Application::OnWindowResized(Event &e) { return false; };
+bool Application::OnWindowResized(Seed::WindowResizedEvent &e) {
 
-bool Application::OnWindowMoved(Event &e) {
+    if (e.GetWidth() == 0 || e.GetHeight() == 0) {
+        m_minimized = true;
+    };
+
+    m_minimized = false;
+
+    seed_Window->Resized();
+    Seed_Trace("Window Resized x: %d :: y: %d ...", e.GetWidth(), e.GetHeight());
+    return true;
+};
+
+bool Application::OnWindowMoved(WindowMovedEvent &e) {
     (void)e;
-    Seed_Trace("Window moved...");
-    return false;
+    Seed_Trace("Window moved x: %d :: y: %d ...", e.GetX(), e.GetY());
+    return true;
 };
 
 // closing handle
-bool Application::OnWindowClosed(Event &e) {
+bool Application::OnWindowClosed(WindowClosedEvent &e) {
     (void)e;
-    Seed_Warn("Window closed event received");
+    Seed_Trace("Window closed event received");
     seed_running = false;
     return true;
 }

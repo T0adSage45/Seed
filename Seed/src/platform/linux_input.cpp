@@ -1,10 +1,8 @@
 #include "linux_input.h"
-#include "SDL3/SDL_events.h"
 #include "SDL3/SDL_keyboard.h"
 #include "SDL3/SDL_mouse.h"
-#include "events.h"
 #include "input.h"
-#include "keycode.h"
+#include "utility/key.h"
 
 namespace Seed {
 

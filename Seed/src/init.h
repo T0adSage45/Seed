@@ -8,7 +8,7 @@ extern Seed::Application *Seed::CreateApp();
 
 int main(void) {
     auto leaf =
-        std::unique_ptr<Seed::Application>(Seed::CreateApp()); // application instance (factory)
+        Seed::Scope<Seed::Application>(Seed::CreateApp()); // application instance (factory)
     leaf->Run();
 }
 

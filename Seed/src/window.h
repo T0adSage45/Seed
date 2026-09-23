@@ -11,8 +11,7 @@ struct WindowProps {
     unsigned int Width;
     unsigned int Height;
 
-    WindowProps(const std::string &title = "SEED Window",
-                unsigned int width = 700,
+    WindowProps(const std::string &title = "SEED Window", unsigned int width = 700,
                 unsigned int height = 500)
         : Title(title),
           Width(width),
@@ -29,6 +28,8 @@ public:
 
     virtual unsigned int GetWidth() const = 0;
     virtual unsigned int GetHeight() const = 0;
+
+    virtual void Resized() = 0;
 
     virtual void SetEventCallback(const EventCallbackFn &callback) = 0;
 

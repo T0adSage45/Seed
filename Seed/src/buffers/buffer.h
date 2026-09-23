@@ -1,57 +1,11 @@
 #pragma once
 #include <pch.h>
-#include "core.h"
 #include <cstdint>
 #include <vector>
+#include "shader/shader.h"
+#include "core.h"
 
 namespace Seed {
-
-enum class ShaderDataType {
-    None = 0,
-    Float,
-    Float2,
-    Float3,
-    Float4,
-    Mat3,
-    Mat4,
-    Int,
-    Int2,
-    Int3,
-    Int4,
-    Bool
-};
-
-static uint32_t ShaderDataTypeSize(ShaderDataType type) {
-    switch (type) {
-    case Seed::ShaderDataType::Float:
-        return 4;
-    case Seed::ShaderDataType::Float2:
-        return 4 * 2;
-    case Seed::ShaderDataType::Float3:
-        return 4 * 3;
-    case Seed::ShaderDataType::Float4:
-        return 4 * 4;
-    case Seed::ShaderDataType::Mat3:
-        return 4 * 3 * 3;
-    case Seed::ShaderDataType::Mat4:
-        return 4 * 4 * 4;
-    case Seed::ShaderDataType::Int:
-        return 4;
-    case Seed::ShaderDataType::Int2:
-        return 4 * 2;
-    case Seed::ShaderDataType::Int3:
-        return 4 * 3;
-    case Seed::ShaderDataType::Int4:
-        return 4 * 4;
-    case Seed::ShaderDataType::Bool:
-        return 1;
-    case Seed::ShaderDataType::None:
-        return 0;
-    };
-
-    SEED_CORE_ASSERT(false, "Unkown ShaderDataType");
-    return 0;
-};
 
 struct BufferElem {
     std::string Name;
@@ -102,6 +56,7 @@ struct BufferElem {
     };
 };
 
+// BufferLayout //
 class BufferLayout {
 public:
     BufferLayout() {};
@@ -135,9 +90,10 @@ private:
     uint32_t m_stride = 0;
 };
 
+// VertexBuffer //
 class VertexBuffer {
 public:
-    virtual ~VertexBuffer() {}
+    virtual ~VertexBuffer() {};
 
     virtual void Bind() const = 0;
     virtual void UnBind() const = 0;
@@ -146,8 +102,10 @@ public:
     virtual void SetLayout(const BufferLayout &layout) = 0;
 
     static VertexBuffer *Create(float *verts, uint32_t size);
+    static VertexBuffer *Create(uint32_t size);
 };
 
+// IndexBuffer //
 class IndexBuffer {
 public:
     virtual ~IndexBuffer() {}
@@ -158,8 +116,31 @@ public:
     virtual uint32_t GetCount() const = 0;
 
     static IndexBuffer *Create(uint32_t *indices, uint32_t size);
+    static IndexBuffer *Create(uint32_t size);
 };
 
+// FrameBuffers //
+struct ___Seed_FrameBuff_Specs__ {
+    uint32_t width, height;
+    bool SwapChain_Target = false; // for renderpass hold
+};
+
+class FrameBuffers {
+
+public:
+    virtual ___Seed_FrameBuff_Specs__ &GetSpecs() = 0;
+
+    static FrameBuffers *Create(___Seed_FrameBuff_Specs__ &fbspec);
+    virtual ~FrameBuffers() {};
+
+    virtual uint32_t GetClrAttachment() const = 0;
+
+    virtual void Revalidate() = 0;
+    virtual void Bind() const = 0;
+    virtual void UnBind() const = 0;
+};
+
+// VertexArr //
 class VertexArr {
 public:
     virtual ~VertexArr() {}
@@ -167,11 +148,11 @@ public:
     virtual void Bind() const = 0;
     virtual void UnBind() const = 0;
 
-    virtual void AddVertBuffer(const std::shared_ptr<VertexBuffer> &vertbuf) = 0;
-    virtual void SetIndexBuffer(const std::shared_ptr<IndexBuffer> &indexbuf) = 0;
+    virtual void AddVertBuffer(const Seed::Ref<VertexBuffer> &vertbuf) = 0;
+    virtual void SetIndexBuffer(const Seed::Ref<IndexBuffer> &indexbuf) = 0;
 
-    virtual const std::vector<std::shared_ptr<VertexBuffer>> &GetVertexBuf() const = 0;
-    virtual const std::shared_ptr<IndexBuffer> &GetIndexBuf() const = 0;
+    virtual const std::vector<Seed::Ref<VertexBuffer>> &GetVertexBuf() const = 0;
+    virtual const Seed::Ref<IndexBuffer> &GetIndexBuf() const = 0;
 
     static VertexArr *Create();
 };

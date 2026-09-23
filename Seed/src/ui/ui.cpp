@@ -2,10 +2,11 @@
 #include "SDL3/SDL_events.h"
 #include "SDL3/SDL_video.h"
 #include "app.h"
+#include "events.h"
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl3.h"
-#include "layers.h"
+#include "layers/layers.h"
 #include "runtime.h"
 
 struct SDL_Window; // Forward declaration for SDL3 opaque type
@@ -25,12 +26,12 @@ void Seed::DebugUi::OnAttach() {
     ImGuiIO &io = ImGui::GetIO();
     io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
     io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
+    io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;
+    io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking
-    // does not works in linux waylands.
-    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform
-    // Windows
+    // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;     // Enable Docking
+    // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;   // Enable Multi-Viewport / Platform
 
     Application &app = Application::Get();
     ImGui_ImplSDL3_InitForOpenGL(static_cast<SDL_Window *>(app.GetWindow().GetNativeWindow()),
@@ -71,6 +72,7 @@ void Seed::DebugUi::End() {
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
         SDL_Window *backup_current_window = SDL_GL_GetCurrentWindow();
         SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
         SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
@@ -78,7 +80,6 @@ void Seed::DebugUi::End() {
 };
 
 void Seed::DebugUi::OnImGuiDrawCall() {
-    // bool show = true;
     // ImGui::ShowDemoWindow(&show);
 };
 

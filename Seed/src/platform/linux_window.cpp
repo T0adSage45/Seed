@@ -5,7 +5,7 @@
 #include "renderer/opengl.h"
 #include "GL/glew.h"
 #include "core.h"
-#include "keycode.h"
+#include "utility/key.h"
 #include "events.h"
 #include "imgui_impl_sdl3.h"
 #include "runtime.h"
@@ -42,7 +42,7 @@ void _Sdl_Window::Init(const WindowProps &props) {
 
     seed_data.seed_Window =
         SDL_CreateWindow(seed_data.Title.c_str(), (int)props.Width, (int)props.Height,
-                         SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+                         SDL_WINDOW_RESIZABLE | SDL_WINDOW_MINIMIZED | SDL_WINDOW_OPENGL);
     if (!seed_data.seed_Window) {
         Seed_Error("seed window not created");
     }
@@ -139,6 +139,8 @@ void _Sdl_Window::OnUpdate(Timestep delta) {
 
     SDL_GL_SwapWindow(seed_data.seed_Window);
 }
+
+void _Sdl_Window::Resized() { glViewport(0, 0, seed_data.Width, seed_data.Height); };
 
 void _Sdl_Window::SetVSync(bool enabled) {
     if (enabled) {

@@ -1,4 +1,4 @@
-#include "keycode.h"
+#include "key.h"
 #include <SDL3/SDL_scancode.h>
 
 namespace Seed {

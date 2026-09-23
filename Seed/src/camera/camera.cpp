@@ -7,7 +7,7 @@
 #include "glm/ext/vector_float3.hpp"
 #include "glm/matrix.hpp"
 #include "input.h"
-#include "keycode.h"
+#include "utility/key.h"
 #include "log.h"
 #include <glm/common.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -64,27 +64,21 @@ void OrhtoCamCtrl::OnEvent(Event &e) {
 
 void OrhtoCamCtrl::OnUpdate(Timestep t) {
 
-    m_camSpeed = 10.0 * t.GetSeconds();
+    m_camSpeed = 2.0 * t.GetSeconds();
     m_camPos = m_cam.GetPosition();
     m_camRot = m_cam.GetRotation();
 
     if (InputManager::IsKeyPressed(Seed_KeyA)) {
-        Seed_Trace("left key pressed...");
         m_camPos.x += m_camSpeed;
     } else if (InputManager::IsKeyPressed(Seed_KeyD)) {
-        Seed_Trace("right key pressed...");
         m_camPos.x -= m_camSpeed;
     } else if (InputManager::IsKeyPressed(Seed_KeyW)) {
-        Seed_Trace("right key pressed...");
         m_camPos.y -= m_camSpeed;
     } else if (InputManager::IsKeyPressed(Seed_KeyS)) {
-        Seed_Trace("right key pressed...");
         m_camPos.y += m_camSpeed;
-    } else if (InputManager::IsKeyPressed(Seed_KeyQ)) {
-        Seed_Trace("right key pressed...");
+    } else if (InputManager::IsKeyPressed(Seed_KeyQ) && m_rotation) {
         m_camRot.z -= m_camSpeed;
-    } else if (InputManager::IsKeyPressed(Seed_KeyE)) {
-        Seed_Trace("right key pressed...");
+    } else if (InputManager::IsKeyPressed(Seed_KeyE) && m_rotation) {
         m_camRot.z += m_camSpeed;
     };
 
@@ -94,7 +88,7 @@ void OrhtoCamCtrl::OnUpdate(Timestep t) {
 };
 
 bool OrhtoCamCtrl::OnMouseScrolled(MouseScrolledEvent &e) {
-    m_zoom -= e.GetScrollY() * 0.30f;
+    m_zoom -= e.GetScrollY() * 0.25f;
     m_cam.SetProjection(-m_aspect_ratio * m_zoom, m_aspect_ratio * m_zoom, -m_zoom, m_zoom);
     Seed_Trace("MouseScrolledEvent... %f", m_zoom);
     return false;

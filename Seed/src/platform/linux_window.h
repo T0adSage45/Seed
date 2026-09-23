@@ -17,6 +17,8 @@ public:
     inline unsigned int GetWidth() const override { return seed_data.Width; };
     inline unsigned int GetHeight() const override { return seed_data.Height; };
 
+    virtual void Resized() override;
+
     inline void SetEventCallback(const EventCallbackFn &callback) override {
         seed_data.EventCallback = callback;
     };
